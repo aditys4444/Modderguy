@@ -330,26 +330,33 @@ function initSplashScreen() {
   const statusText = $("splashStatusText");
   if (!splash) return;
 
-  let progress = 25;
-  if (pBar) pBar.style.width = "25%";
+  const dismissSplash = () => {
+    splash.classList.add("fade-out");
+    setTimeout(() => {
+      splash.style.display = "none";
+      try { splash.remove(); } catch (e) {}
+    }, 200);
+  };
+
+  // Immediate dismiss on any user interaction
+  splash.addEventListener("click", dismissSplash);
+  splash.addEventListener("touchstart", dismissSplash, { passive: true });
+
+  let progress = 30;
+  if (pBar) pBar.style.width = "30%";
 
   const timer = setInterval(() => {
-    progress += Math.floor(Math.random() * 30) + 20;
+    progress += Math.floor(Math.random() * 35) + 25;
     if (progress >= 100) {
       progress = 100;
       if (pBar) pBar.style.width = "100%";
       if (statusText) statusText.textContent = "Live Radar Ready ✓";
       clearInterval(timer);
-      setTimeout(() => {
-        splash.classList.add("fade-out");
-        setTimeout(() => {
-          splash.style.display = "none";
-        }, 400);
-      }, 150);
+      setTimeout(dismissSplash, 120);
     } else {
       if (pBar) pBar.style.width = `${progress}%`;
     }
-  }, 60);
+  }, 40);
 }
 
 /* =========================================================
@@ -375,8 +382,8 @@ function openConsoleScreen(role) {
   homeNavBtn.style.display = "flex";
 
   const t = I18N[state.lang] || I18N.hinglish;
-  $("activePersonaLabel").textContent = `${t.activeConsolePrefix} ${m.label}`;
-  $("consoleCityName").textContent = state.city || "Location";
+  if ($("activePersonaLabel")) $("activePersonaLabel").textContent = `${t.activeConsolePrefix} ${m.label}`;
+  if ($("consoleCityName")) $("consoleCityName").textContent = state.city || "Location";
 
   renderSuggestionChips(role);
 
@@ -390,7 +397,18 @@ function openConsoleScreen(role) {
 
 homeNavBtn?.addEventListener("click", showHomeScreen);
 
-// Robust Event Delegation for Persona Cards
+// Direct and Delegated Click Listeners for Persona Cards
+function bindPersonaCards() {
+  document.querySelectorAll(".persona-card").forEach(card => {
+    card.style.cursor = "pointer";
+    card.onclick = function(e) {
+      const r = this.getAttribute("data-role");
+      if (r) openConsoleScreen(r);
+    };
+  });
+}
+bindPersonaCards();
+
 document.addEventListener("click", (e) => {
   const card = e.target.closest(".persona-card");
   if (card && card.dataset.role) {
@@ -1597,6 +1615,11 @@ async function loadUserPrefs() {
 initSplashScreen();
 initLiveRadar();
 detectLocation();
+// Instant weather fallback to ensure Hero card is vibrant immediately
+if (!state.currentWeather) {
+  fetchWeatherByCity("Mumbai, Maharashtra, India");
+}
 updateAuthUI();
 applyLanguage(state.lang);
 showHomeScreen();
+bindPersonaCards();
