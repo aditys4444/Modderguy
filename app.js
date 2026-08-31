@@ -328,25 +328,28 @@ function initSplashScreen() {
   const splash = $("splashScreen");
   const pBar = $("splashProgressBar");
   const statusText = $("splashStatusText");
+  if (!splash) return;
 
-  let progress = 15;
-  pBar.style.width = "15%";
+  let progress = 25;
+  if (pBar) pBar.style.width = "25%";
 
   const timer = setInterval(() => {
-    progress += Math.floor(Math.random() * 25) + 15;
+    progress += Math.floor(Math.random() * 30) + 20;
     if (progress >= 100) {
       progress = 100;
-      pBar.style.width = "100%";
-      statusText.textContent = "Live Atmospheric Radar Ready ✓";
+      if (pBar) pBar.style.width = "100%";
+      if (statusText) statusText.textContent = "Live Radar Ready ✓";
       clearInterval(timer);
       setTimeout(() => {
         splash.classList.add("fade-out");
-      }, 350);
+        setTimeout(() => {
+          splash.style.display = "none";
+        }, 400);
+      }, 150);
     } else {
-      pBar.style.width = `${progress}%`;
-      if (progress > 50) statusText.textContent = "Connecting to real-time satellite & AQI radar…";
+      if (pBar) pBar.style.width = `${progress}%`;
     }
-  }, 100);
+  }, 60);
 }
 
 /* =========================================================
@@ -363,6 +366,7 @@ function showHomeScreen() {
 function openConsoleScreen(role) {
   state.role = role;
   const m = ROLE_META[role];
+  if (!m) return;
   document.documentElement.style.setProperty("--accent", m.accent);
   document.documentElement.style.setProperty("--accent-soft", m.soft);
 
@@ -384,10 +388,14 @@ function openConsoleScreen(role) {
   if (state.user) persistUserPrefs();
 }
 
-homeNavBtn.addEventListener("click", showHomeScreen);
+homeNavBtn?.addEventListener("click", showHomeScreen);
 
-document.querySelectorAll(".persona-card").forEach(card => {
-  card.addEventListener("click", () => openConsoleScreen(card.dataset.role));
+// Robust Event Delegation for Persona Cards
+document.addEventListener("click", (e) => {
+  const card = e.target.closest(".persona-card");
+  if (card && card.dataset.role) {
+    openConsoleScreen(card.dataset.role);
+  }
 });
 
 function renderSuggestionChips(role) {

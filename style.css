@@ -22,7 +22,7 @@
   --info: #38BDF8;
   --purple: #8B5CF6;
 
-  /* Default Theme Accents (overwritten dynamically per active role) */
+  /* Dynamic Accent Colors */
   --accent: #E8A33D;
   --accent-soft: rgba(232, 163, 61, 0.14);
   --accent-glow: 0 0 24px rgba(232, 163, 61, 0.35);
@@ -60,7 +60,6 @@ html, body {
   line-height: 1.5;
   overflow: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
@@ -68,35 +67,15 @@ html, body {
   color: var(--accent);
 }
 
-/* Sleek Modern Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 999px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent);
-}
+/* Sleek Scrollbars */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent); }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-button, input, select {
-  font-family: inherit;
-}
-
-.num, .brand-name, h1, h2, h3, .temp, .splash-title, .m-val, .role-name {
-  font-family: 'Space Grotesk', system-ui, sans-serif;
-}
+img { max-width: 100%; height: auto; display: block; }
+button, input, select { font-family: inherit; }
+.num, .brand-name, h1, h2, h3, .temp, .splash-title, .m-val, .role-name { font-family: 'Space Grotesk', system-ui, sans-serif; }
 
 /* =========================================================
    SPLASH / LOADING SCREEN
@@ -109,9 +88,8 @@ button, input, select {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: opacity 0.55s ease, visibility 0.55s ease;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
-
 .splash-screen.fade-out {
   opacity: 0;
   visibility: hidden;
@@ -158,6 +136,7 @@ button, input, select {
   background: radial-gradient(circle, rgba(232, 163, 61, 0.45) 0%, transparent 70%);
   filter: blur(14px);
   z-index: 1;
+  pointer-events: none;
   animation: glowPulse 2s ease-in-out infinite alternate;
 }
 
@@ -173,14 +152,12 @@ button, input, select {
   color: #FFFFFF;
   margin-bottom: 6px;
 }
-
 .splash-title .highlight {
   color: var(--accent);
   background: linear-gradient(135deg, #FFC069, #E8A33D);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-
 .splash-subtitle {
   font-size: 13.5px;
   color: var(--text-dim);
@@ -205,11 +182,9 @@ button, input, select {
   overflow: hidden;
   position: relative;
 }
-
 .splash-progress-bar {
   position: absolute;
-  left: 0;
-  top: 0;
+  left: 0; top: 0;
   height: 100%;
   width: 0%;
   background: linear-gradient(90deg, #E8A33D, #FFD591);
@@ -217,7 +192,6 @@ button, input, select {
   transition: width 0.25s ease;
   box-shadow: 0 0 10px #E8A33D;
 }
-
 .splash-status-text {
   font-size: 12px;
   color: var(--text-faint);
@@ -238,7 +212,6 @@ button, input, select {
   background: var(--bg);
   position: relative;
   overflow: hidden;
-  box-shadow: 0 0 80px rgba(0, 0, 0, 0.5);
 }
 
 /* =========================================================
@@ -325,10 +298,6 @@ button, input, select {
   position: relative;
 }
 
-.lang-wrapper {
-  position: relative;
-}
-
 .lang-select {
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -340,7 +309,6 @@ button, input, select {
   outline: none;
   cursor: pointer;
   transition: all .18s ease;
-  appearance: auto;
 }
 .lang-select:hover, .lang-select:focus {
   border-color: var(--accent);
@@ -360,7 +328,6 @@ button, input, select {
   align-items: center;
   justify-content: center;
   transition: all .18s ease;
-  position: relative;
 }
 .icon-btn:hover {
   background: var(--surface-3);
@@ -372,7 +339,7 @@ button, input, select {
   background: rgba(16, 185, 129, 0.12);
 }
 
-/* Account Dropdown Menu */
+/* Dropdown Menu */
 .dropdown-menu {
   position: absolute;
   top: calc(100% + 8px);
@@ -401,9 +368,7 @@ button, input, select {
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: all .15s ease;
 }
-.dropdown-menu .danger-btn:hover { background: var(--danger); color: #FFF; }
 
 /* =========================================================
    MAIN VIEWPORT ROUTER (Screens)
@@ -421,15 +386,15 @@ button, input, select {
   width: 100%;
   height: 100%;
   display: none;
-  animation: fadeInView .28s ease;
 }
 .view-screen.active-screen {
   display: flex;
   flex-direction: column;
+  animation: fadeInView .25s ease;
 }
 
 @keyframes fadeInView {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
@@ -447,7 +412,7 @@ button, input, select {
 
 /* Hero Live Weather Card */
 .hero-weather-card {
-  background: linear-gradient(145deg, rgba(20, 33, 59, 0.8) 0%, rgba(14, 24, 42, 0.95) 100%);
+  background: linear-gradient(145deg, rgba(20, 33, 59, 0.85) 0%, rgba(14, 24, 42, 0.98) 100%);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 20px;
@@ -465,7 +430,8 @@ button, input, select {
   top: 0; left: 0; right: 0;
   height: 2px;
   background: linear-gradient(90deg, transparent, var(--accent), transparent);
-  opacity: 0.75;
+  opacity: 0.8;
+  pointer-events: none;
 }
 
 .hero-card-header {
@@ -688,6 +654,7 @@ button, input, select {
   transition: all .2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
+  user-select: none;
 }
 .persona-card:hover {
   border-color: var(--accent);
@@ -699,6 +666,16 @@ button, input, select {
   transform: scale(0.98);
 }
 
+.card-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 0% 0%, var(--accent-soft) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity .2s ease;
+}
+.persona-card:hover .card-glow { opacity: 1; }
+
 .persona-icon-box {
   width: 52px;
   height: 52px;
@@ -708,6 +685,7 @@ button, input, select {
   justify-content: center;
   font-size: 26px;
   flex-shrink: 0;
+  pointer-events: none;
 }
 .farmer-icon    { background: rgba(143, 163, 94, 0.18); border: 1px solid rgba(143, 163, 94, 0.35); }
 .fisherman-icon { background: rgba(62, 157, 184, 0.18); border: 1px solid rgba(62, 157, 184, 0.35); }
@@ -718,6 +696,7 @@ button, input, select {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  pointer-events: none;
 }
 
 .persona-title-row {
@@ -1215,7 +1194,7 @@ button, input, select {
 
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* Chat Composer (Fixed Bottom Bar) */
+/* Chat Composer */
 .chat-composer {
   flex-shrink: 0;
   display: flex;
@@ -1281,7 +1260,6 @@ button, input, select {
   -webkit-backdrop-filter: blur(14px);
   z-index: 200;
   padding: 16px;
-  animation: fadeInView .2s ease;
 }
 .modal-backdrop.visible { display: flex; }
 
