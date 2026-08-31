@@ -1,1101 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>WeatherGPT</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#0B1220;
-    --surface:#121B2E;
-    --surface-2:#1A2540;
-    --surface-3:#212D4A;
-    --border:#263355;
-    --text:#E8ECF4;
-    --text-dim:#8B96AC;
-    --text-faint:#5C6885;
-    --danger:#E0566B;
-    --ok:#4FBF8B;
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeatherGPT - Role-Based Weather AI</title>
+  <meta name="description" content="AI weather advisor tailored for Farmers, Fishermen, and Everyday decisions." />
 
-    /* role accents — set by JS on <body> */
-    --accent:#E8A33D;
-    --accent-soft:rgba(232,163,61,0.14);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html{ width:100%; height:100%; }
-  body{
-    width:100%;
-    min-height:100vh;
-    background: radial-gradient(120% 100% at 50% 0%, #14203a 0%, var(--bg) 55%);
-    color:var(--text);
-    font-family:'Inter', sans-serif;
-    display:flex;
-    justify-content:center;
-    align-items:flex-start;
-    padding:0;
-  }
-  .num, .brand, h1, h2, h3{ font-family:'Space Grotesk', sans-serif; }
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 
-  #app{
-    width:100%;
-    max-width:420px;
-    min-height:100vh;
-    background:var(--surface);
-    display:flex;
-    flex-direction:column;
-    position:relative;
-    border-left:1px solid var(--border);
-    border-right:1px solid var(--border);
-    box-shadow:0 0 60px rgba(0,0,0,0.4);
-  }
-  #layout{ display:flex; flex-direction:column; flex:1; min-height:0; }
-  #sidebar{ display:flex; flex-direction:column; }
-
-  @media (min-width:860px){
-    body{ padding:0; align-items:stretch; }
-    #app{ max-width:none; width:100%; min-height:100vh; border-radius:0; box-shadow:none; border:none; }
-    #layout{ flex-direction:row; flex:1; min-height:0; }
-    #sidebar{
-      width:380px; flex-shrink:0;
-      border-right:1px solid var(--border);
-      overflow-y:auto;
-    }
-    #roleScreen{ flex:none; }
-    #chatScreen{
-      display:flex !important;
-      flex:1; min-height:0;
-    }
-  }
-
-  /* ---------- Header ---------- */
-  header{
-    padding:18px 18px 14px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    border-bottom:1px solid var(--border);
-  }
-  .brand{ font-size:19px; font-weight:700; letter-spacing:-0.01em; display:flex; align-items:center; gap:8px;}
-  .brand .dot{ width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 10px var(--accent);}
-  .header-actions{ display:flex; gap:8px; align-items:center; }
-  .icon-btn{
-    width:34px; height:34px; border-radius:10px;
-    background:var(--surface-2); border:1px solid var(--border);
-    display:flex; align-items:center; justify-content:center;
-    cursor:pointer; color:var(--text-dim); font-size:16px;
-    transition:background .15s, color .15s;
-  }
-  .icon-btn:hover{ background:var(--surface-3); color:var(--text); }
-  .icon-btn.active{ color:var(--accent); border-color:var(--accent); }
-
-  #accountMenu{
-    position:absolute; top:44px; right:0; z-index:40;
-    background:var(--surface-2); border:1px solid var(--border);
-    border-radius:12px; padding:12px; min-width:190px;
-    display:none; box-shadow:0 10px 30px rgba(0,0,0,0.4);
-  }
-  #accountMenu.visible{ display:block; }
-  #accountMenu .email{ font-size:11.5px; color:var(--text-dim); margin-bottom:10px; word-break:break-all; }
-  #accountMenu button{
-    width:100%; background:var(--surface-3); border:1px solid var(--border); color:var(--text);
-    border-radius:8px; padding:8px; font-size:12.5px; cursor:pointer;
-  }
-  #accountMenu button:hover{ border-color:var(--danger); color:var(--danger); }
-
-  /* ---------- Role select screen ---------- */
-  #roleScreen{ padding:28px 20px; display:flex; flex-direction:column; gap:22px; flex:1;}
-  #roleScreen h1{ font-size:24px; line-height:1.3; }
-  #roleScreen p.sub{ color:var(--text-dim); font-size:14px; }
-  .role-grid{ display:flex; flex-direction:column; gap:12px; margin-top:6px;}
-  .role-card{
-    display:flex; align-items:center; gap:14px;
-    padding:16px; border-radius:14px;
-    background:var(--surface-2); border:1px solid var(--border);
-    cursor:pointer; text-align:left;
-    transition:border-color .15s, background .15s, transform .1s;
-  }
-  .role-card:hover{ transform:translateY(-1px); }
-  .role-card .role-icon{
-    width:44px; height:44px; border-radius:12px;
-    display:flex; align-items:center; justify-content:center;
-    font-size:20px; flex-shrink:0;
-  }
-  .role-card .role-name{ font-weight:600; font-size:15px; }
-  .role-card .role-desc{ font-size:12.5px; color:var(--text-dim); margin-top:2px;}
-  .role-card[data-role="farmer"] .role-icon{ background:rgba(143,163,94,0.18); color:#A9C079;}
-  .role-card[data-role="fisherman"] .role-icon{ background:rgba(62,157,184,0.18); color:#6FC2DE;}
-  .role-card[data-role="general"] .role-icon{ background:rgba(232,163,61,0.18); color:#F0B85A;}
-  .role-card[data-role="farmer"]:hover{ border-color:#8FA35E; }
-  .role-card[data-role="fisherman"]:hover{ border-color:#3E9DB8; }
-  .role-card[data-role="general"]:hover{ border-color:#E8A33D; }
-
-  /* ---------- Live conditions strip ---------- */
-  #conditionsStrip{
-    padding:16px 18px;
-    display:flex; align-items:center; justify-content:space-between;
-    border-bottom:1px solid var(--border);
-    background:var(--surface-2);
-  }
-  #conditionsStrip .temp-block{ display:flex; align-items:baseline; gap:6px;}
-  #conditionsStrip .temp{ font-size:34px; font-weight:700; font-family:'Space Grotesk'; }
-  #conditionsStrip .cond-text{ font-size:12.5px; color:var(--text-dim); text-transform:capitalize; margin-top:2px;}
-  #conditionsStrip .mini-stats{ display:flex; flex-direction:column; gap:3px; font-size:11.5px; color:var(--text-dim); }
-  #conditionsStrip .city-row{ font-size:12px; color:var(--accent); font-weight:600; margin-bottom:4px; display:flex; align-items:center; gap:5px;}
-  #sparkline{ display:block; }
-
-  .city-controls{ display:flex; align-items:center; gap:6px; margin-top:8px; }
-  .city-controls input{
-    flex:1; background:var(--surface); border:1px solid var(--border);
-    border-radius:8px; padding:6px 10px; font-size:12.5px; color:var(--text);
-    font-family:'Inter';
-  }
-  .city-controls button{
-    background:var(--surface-3); border:1px solid var(--border); color:var(--text-dim);
-    border-radius:8px; padding:6px 9px; font-size:12px; cursor:pointer;
-  }
-
-  /* ---------- Toggle row (demo / monitor) ---------- */
-  #toggleRow{
-    display:flex; gap:8px; padding:10px 18px;
-    border-bottom:1px solid var(--border);
-    font-size:11.5px;
-  }
-  .toggle-chip{
-    display:flex; align-items:center; gap:6px;
-    background:var(--surface-2); border:1px solid var(--border);
-    padding:6px 10px; border-radius:999px; cursor:pointer; color:var(--text-dim);
-    transition:border-color .15s, color .15s;
-  }
-  .toggle-chip .led{ width:6px; height:6px; border-radius:50%; background:var(--text-faint); }
-  .toggle-chip.on{ color:var(--text); border-color:var(--accent); }
-  .toggle-chip.on .led{ background:var(--ok); box-shadow:0 0 6px var(--ok); }
-
-  /* ---------- Status panel (sidebar wrapper for conditions+toggles, post role-select) ---------- */
-  #statusPanel{ display:none; flex-direction:column; }
-  #statusPanel.visible{ display:flex; }
-
-  /* ---------- Chat placeholder (desktop, before role picked) ---------- */
-  #chatPlaceholder{
-    display:flex; flex:1; flex-direction:column; align-items:center; justify-content:center;
-    gap:10px; color:var(--text-dim); text-align:center; padding:40px; font-size:14px;
-  }
-  #chatPlaceholder .ph-icon{ font-size:36px; }
-
-  /* ---------- Chat ---------- */
-  #chatScreen{ display:none; flex-direction:column; flex:1; min-height:0; }
-  #chatScreen.visible{ display:flex; }
-  #messages{
-    flex:1; overflow-y:auto; padding:16px 14px 10px;
-    display:flex; flex-direction:column; gap:12px;
-  }
-  .msg-row{ display:flex; gap:8px; max-width:100%; }
-  .msg-row.user{ flex-direction:row-reverse; }
-  .avatar{
-    width:28px; height:28px; border-radius:50%; flex-shrink:0;
-    display:flex; align-items:center; justify-content:center; font-size:13px;
-    background:var(--surface-3); color:var(--accent); margin-top:2px;
-  }
-  .msg-row.user .avatar{ background:var(--accent-soft); }
-  .bubble{
-    background:var(--surface-2); border:1px solid var(--border);
-    padding:10px 13px; border-radius:14px; font-size:13.5px; line-height:1.5;
-    max-width:78%;
-  }
-  .msg-row.user .bubble{ background:var(--accent); color:#10131A; border-color:var(--accent); font-weight:500; }
-  .msg-row.assistant .bubble{ border-top-left-radius:4px; }
-  .msg-row.user .bubble{ border-top-right-radius:4px; }
-
-  .alert-card{
-    border:1px solid var(--danger); background:rgba(224,86,107,0.1);
-    border-radius:14px; padding:12px 13px; font-size:13px; max-width:88%;
-  }
-  .alert-card .alert-head{ display:flex; align-items:center; gap:6px; color:var(--danger); font-weight:600; font-size:12.5px; margin-bottom:6px;}
-  .auto-tag{
-    display:inline-flex; align-items:center; gap:4px;
-    font-size:10px; color:var(--text-faint); border:1px solid var(--border);
-    padding:2px 7px; border-radius:999px; margin-bottom:8px;
-  }
-
-  .teaser-line{
-    margin-top:8px; padding:9px 11px; border-radius:10px;
-    background:var(--accent-soft); border:1px solid var(--accent);
-    font-size:12.5px; color:var(--accent); cursor:pointer; display:flex; align-items:center; gap:7px;
-  }
-
-  .advice-block{
-    margin-top:9px; padding:10px 11px; border-radius:10px;
-    background:var(--surface-3); border:1px solid var(--border); font-size:12.5px;
-  }
-  .advice-block .label{ font-size:10.5px; color:var(--text-dim); margin-bottom:5px; }
-  .confidence-bar-track{ height:5px; background:var(--surface); border-radius:99px; margin-top:6px; overflow:hidden;}
-  .confidence-bar-fill{ height:100%; background:var(--accent); border-radius:99px; }
-  .confidence-reason{ color:var(--text-dim); font-size:11px; margin-top:5px;}
-
-  .verify-row{ margin-top:10px; display:flex; align-items:center; justify-content:space-between; font-size:12px; }
-  .verify-row .vcount{ color:var(--text-dim); }
-  .verify-btns{ display:flex; gap:6px; }
-  .verify-btns button{
-    border:1px solid var(--border); background:var(--surface); color:var(--text-dim);
-    border-radius:8px; padding:4px 10px; font-size:11.5px; cursor:pointer;
-  }
-  .verify-btns button.yes:hover{ border-color:var(--ok); color:var(--ok); }
-  .verify-btns button.no:hover{ border-color:var(--danger); color:var(--danger); }
-  .verify-login{ color:var(--accent); cursor:pointer; font-size:11.5px; }
-
-  /* reasoning trace */
-  .trace-card{
-    background:var(--surface-2); border:1px solid var(--border);
-    border-radius:14px; padding:11px 13px; max-width:80%; font-size:12px;
-  }
-  .trace-step{ display:flex; align-items:center; gap:8px; padding:4px 0; color:var(--text-faint); }
-  .trace-step .tick{
-    width:15px; height:15px; border-radius:50%; border:1.5px solid var(--border);
-    display:flex; align-items:center; justify-content:center; font-size:9px; flex-shrink:0;
-  }
-  .trace-step.active{ color:var(--text); }
-  .trace-step.active .tick{ border-color:var(--accent); }
-  .trace-step.active .tick::after{ content:''; width:6px; height:6px; border-radius:50%; background:var(--accent); animation:pulse 1s infinite; }
-  .trace-step.done{ color:var(--text-dim); }
-  .trace-step.done .tick{ background:var(--ok); border-color:var(--ok); color:#10131A; }
-  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
-
-  /* composer */
-  #composer{
-    display:flex; gap:8px; padding:12px 14px;
-    border-top:1px solid var(--border); background:var(--surface);
-  }
-  #composer input{
-    flex:1; background:var(--surface-2); border:1px solid var(--border);
-    border-radius:12px; padding:11px 14px; color:var(--text); font-size:13.5px; font-family:'Inter';
-  }
-  #composer input:focus{ outline:none; border-color:var(--accent); }
-  #sendBtn{
-    width:42px; height:42px; border-radius:12px; border:none;
-    background:var(--accent); color:#10131A; font-size:16px; cursor:pointer;
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
-  }
-
-  /* ---------- Login modal ---------- */
-  #loginModal{
-    position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-    background:rgba(6,9,17,0.6); backdrop-filter:blur(6px); z-index:50;
-  }
-  #loginModal.visible{ display:flex; }
-  .modal-card{
-    width:calc(100% - 48px); max-width:340px;
-    background:var(--surface-2); border:1px solid var(--border);
-    border-radius:16px; padding:22px; position:relative;
-  }
-  .modal-close{
-    position:absolute; top:14px; right:14px; cursor:pointer; color:var(--text-dim);
-    width:26px; height:26px; display:flex; align-items:center; justify-content:center;
-    border-radius:50%; background:var(--surface-3);
-  }
-  .modal-card h2{ font-size:17px; margin-bottom:4px; }
-  .modal-card p.sub{ font-size:12.5px; color:var(--text-dim); margin-bottom:16px; }
-  .modal-card input{
-    width:100%; background:var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:10px 12px; color:var(--text); font-size:13px;
-    margin-bottom:10px; font-family:'Inter';
-  }
-  .modal-card .primary-btn{
-    width:100%; background:var(--accent); color:#10131A; border:none;
-    border-radius:10px; padding:11px; font-weight:600; font-size:13.5px; cursor:pointer; margin-top:4px;
-  }
-  .modal-card .secondary-btn{
-    width:100%; background:transparent; color:var(--text-dim); border:1px solid var(--border);
-    border-radius:10px; padding:10px; font-size:13px; cursor:pointer; margin-top:8px;
-  }
-  .modal-card .switch-row{ text-align:center; font-size:12px; color:var(--text-dim); margin-top:12px; }
-  .modal-card .switch-row span{ color:var(--accent); cursor:pointer; }
-  .modal-err{ color:var(--danger); font-size:11.5px; margin-bottom:8px; min-height:14px; }
-
-  ::-webkit-scrollbar{ width:5px; }
-  ::-webkit-scrollbar-thumb{ background:var(--surface-3); border-radius:99px; }
-</style>
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-<div id="app">
-
-  <header>
-    <div class="brand"><span class="dot"></span>WeatherGPT</div>
-    <div class="header-actions" style="position:relative;">
-      <div class="icon-btn" id="loginTrigger" title="Login">&#128100;</div>
-      <div class="icon-btn" id="backToRoles" title="Change role" style="display:none;">&#8635;</div>
-      <div id="accountMenu">
-        <div class="email" id="accountEmail"></div>
-        <button id="logoutBtn">Log out</button>
+  <div id="app">
+    <!-- Header -->
+    <header>
+      <div class="brand">
+        <span class="dot"></span>
+        <span>WeatherGPT</span>
       </div>
-    </div>
-  </header>
+      <div class="header-actions">
+        <button class="icon-btn" id="loginTrigger" title="Account" aria-label="Account">&#128100;</button>
+        <button class="icon-btn" id="backToRoles" title="Change Role" style="display:none;" aria-label="Change Role">&#8635;</button>
 
-  <!-- ROLE SELECTION + STATUS -->
-  <div id="layout">
-    <aside id="sidebar">
-      <div id="roleScreen">
-        <div>
-          <h1>Weather that talks your language.</h1>
-          <p class="sub">Pick who you are — advice, alerts, and confidence are tuned to your work.</p>
-        </div>
-        <div class="role-grid">
-          <div class="role-card" data-role="farmer">
-            <div class="role-icon">&#127806;</div>
-            <div>
-              <div class="role-name">Farmer</div>
-              <div class="role-desc">Irrigation, sowing windows, crop-safe frost &amp; rain calls</div>
-            </div>
-          </div>
-          <div class="role-card" data-role="fisherman">
-            <div class="role-icon">&#127907;</div>
-            <div>
-              <div class="role-name">Fisherman</div>
-              <div class="role-desc">Wind, swell, and go/no-go calls for the water</div>
-            </div>
-          </div>
-          <div class="role-card" data-role="general">
-            <div class="role-icon">&#9728;&#65039;</div>
-            <div>
-              <div class="role-name">General public</div>
-              <div class="role-desc">Everyday forecast, what to wear, what to carry</div>
-            </div>
-          </div>
+        <!-- Account Dropdown Menu -->
+        <div id="accountMenu" class="dropdown-menu">
+          <div class="email" id="accountEmail"></div>
+          <button id="logoutBtn" class="danger-btn">Log out</button>
         </div>
       </div>
+    </header>
 
-      <div id="statusPanel">
-        <div id="conditionsStrip">
+    <!-- Main Layout -->
+    <div id="layout">
+      <!-- Sidebar -->
+      <aside id="sidebar">
+        <!-- Role Selection Screen -->
+        <section id="roleScreen">
           <div>
-            <div class="city-row" id="cityRow">&#128205; <span id="cityName">Detecting location…</span></div>
-            <div class="temp-block"><span class="temp" id="tempVal">--&#176;</span></div>
-            <div class="cond-text" id="condText">—</div>
-            <div class="city-controls">
-              <input id="cityInput" placeholder="Enter city…" />
-              <button id="detectBtn">&#128204;</button>
+            <h1>Weather that talks your language.</h1>
+            <p class="sub">Pick who you are &mdash; advice, alerts, and confidence are tuned to your work.</p>
+          </div>
+          <div class="role-grid">
+            <div class="role-card" data-role="farmer">
+              <div class="role-icon">&#127806;</div>
+              <div>
+                <div class="role-name">Farmer</div>
+                <div class="role-desc">Irrigation, sowing windows, crop-safe frost &amp; rain calls</div>
+              </div>
+            </div>
+            <div class="role-card" data-role="fisherman">
+              <div class="role-icon">&#127907;</div>
+              <div>
+                <div class="role-name">Fisherman</div>
+                <div class="role-desc">Wind, swell, and go/no-go calls for the water</div>
+              </div>
+            </div>
+            <div class="role-card" data-role="general">
+              <div class="role-icon">&#9728;&#65039;</div>
+              <div>
+                <div class="role-name">General public</div>
+                <div class="role-desc">Everyday forecast, what to wear, what to carry</div>
+              </div>
             </div>
           </div>
-          <div style="text-align:right;">
-            <svg id="sparkline" width="90" height="34" viewBox="0 0 90 34"></svg>
-            <div class="mini-stats">
-              <div>Humidity <span id="humVal">--</span>%</div>
-              <div>Wind <span id="windVal">--</span> km/h</div>
+        </section>
+
+        <!-- Status & Live Conditions Panel -->
+        <section id="statusPanel">
+          <div id="conditionsStrip">
+            <div>
+              <div class="city-row" id="cityRow">&#128205; <span id="cityName">Detecting location&hellip;</span></div>
+              <div class="temp-block"><span class="temp" id="tempVal">--&deg;</span></div>
+              <div class="cond-text" id="condText">&mdash;</div>
+              <div class="city-controls">
+                <input id="cityInput" placeholder="Enter city&hellip;" />
+                <button id="detectBtn" title="Detect Location">&#128204;</button>
+              </div>
+            </div>
+            <div class="sparkline-wrapper">
+              <svg id="sparkline" width="90" height="34" viewBox="0 0 90 34"></svg>
+              <div class="mini-stats">
+                <div>Humidity <span id="humVal">--</span>%</div>
+                <div>Wind <span id="windVal">--</span> km/h</div>
+              </div>
             </div>
           </div>
+
+          <div id="toggleRow">
+            <button class="toggle-chip" id="demoToggle"><span class="led"></span>Demo mode</button>
+            <button class="toggle-chip" id="monitorToggle"><span class="led"></span>Live monitor</button>
+          </div>
+        </section>
+      </aside>
+
+      <!-- Chat Screen -->
+      <main id="chatScreen">
+        <div id="chatPlaceholder">
+          <div class="ph-icon">&#127777;&#65039;</div>
+          <div>Pick a role on the left to start chatting.</div>
         </div>
 
-        <div id="toggleRow">
-          <div class="toggle-chip" id="demoToggle"><span class="led"></span>Demo mode</div>
-          <div class="toggle-chip" id="monitorToggle"><span class="led"></span>Live monitor</div>
+        <div id="messages"></div>
+
+        <div id="composer">
+          <input id="chatInput" placeholder="Ask about the weather&hellip;" autocomplete="off" />
+          <button id="sendBtn" title="Send message" aria-label="Send">&#10148;</button>
         </div>
-      </div>
-    </aside>
-
-    <!-- CHAT -->
-    <main id="chatScreen">
-      <div id="chatPlaceholder">
-        <div class="ph-icon">&#127777;&#65039;</div>
-        <div>Pick a role on the left to start chatting.</div>
-      </div>
-
-      <div id="messages"></div>
-
-      <div id="composer">
-        <input id="chatInput" placeholder="Ask about the weather…" autocomplete="off" />
-        <button id="sendBtn">&#10148;</button>
-      </div>
-    </main>
-  </div>
-</div>
-
-<!-- LOGIN MODAL -->
-<div id="loginModal">
-  <div class="modal-card">
-    <div class="modal-close" id="closeModal">&#10005;</div>
-    <h2 id="modalTitle">Welcome back</h2>
-    <p class="sub" id="modalSub">Log in to see your role-specific decisions, not just the forecast.</p>
-    <div class="modal-err" id="modalErr"></div>
-    <input id="emailInput" type="email" placeholder="Email" />
-    <input id="passInput" type="password" placeholder="Password" />
-    <button class="primary-btn" id="emailAuthBtn">Continue</button>
-    <button class="secondary-btn" id="googleAuthBtn">Continue with Google</button>
-    <div class="switch-row">
-      <span id="switchModeText">New here? <span id="switchModeLink">Create an account</span></span>
+      </main>
     </div>
   </div>
-</div>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <!-- Login Modal -->
+  <div id="loginModal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close" id="closeModal" aria-label="Close modal">&#10005;</button>
+      <h2 id="modalTitle">Welcome back</h2>
+      <p class="sub" id="modalSub">Log in to see your role-specific decisions, not just the forecast.</p>
+      <div class="modal-err" id="modalErr"></div>
 
-<script>
-/* =========================================================
-   CONFIG \u2014 replace these placeholder values before deploy
-   ========================================================= */
-const WORKER_URL = "https://modderguy.cs63saurabh.workers.dev";
+      <input id="emailInput" type="email" placeholder="Email address" autocomplete="email" />
+      <input id="passInput" type="password" placeholder="Password" autocomplete="current-password" />
 
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDJQwi1VnqOkPPYrZbN4uRPsl0CbdNBpks",
-  authDomain: "modderguy-80384.firebaseapp.com",
-  projectId: "modderguy-80384",
-  storageBucket: "modderguy-80384.firebasestorage.app",
-  messagingSenderId: "577447367223",
-  appId: "1:577447367223:web:359f492e2abd734501a5b2"
-};
+      <button class="primary-btn" id="emailAuthBtn">Continue</button>
+      <button class="secondary-btn" id="googleAuthBtn">Continue with Google</button>
 
-firebase.initializeApp(FIREBASE_CONFIG);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
-/* =========================================================
-   STATE
-   ========================================================= */
-const state = {
-  role: null,
-  city: null,
-  coords: null,
-  user: null,
-  demoMode: false,
-  monitorOn: false,
-  monitorTimer: null,
-  lastAlertKey: null,
-  lastAlertAt: 0,
-  authMode: "login", // or "signup"
-  currentWeather: null,
-};
-
-const ROLE_META = {
-  farmer:    { label: "Farmer",    icon: "&#127806;", accent: "#8FA35E", soft: "rgba(143,163,94,0.14)" },
-  fisherman: { label: "Fisherman", icon: "&#127907;", accent: "#3E9DB8", soft: "rgba(62,157,184,0.14)" },
-  general:   { label: "General public", icon: "&#9728;&#65039;", accent: "#E8A33D", soft: "rgba(232,163,61,0.14)" }
-};
-
-const OFFTOPIC_GUARD_KEYWORDS = null; // scope guard uses inverse keyword match below
-const WEATHER_KEYWORDS = ["weather","rain","temperature","temp","forecast","wind","humidity","storm","heat",
-  "cold","cyclone","flood","drought","frost","hail","snow","climate","sun","cloud","monsoon","alert",
-  "swell","tide","irrigation","sow","harvest","crop","fish","fishing","sea","wave","uv","aqi","air quality"];
-
-/* =========================================================
-   DOM refs
-   ========================================================= */
-const $ = (id) => document.getElementById(id);
-const roleScreen = $("roleScreen");
-const chatScreen = $("chatScreen");
-const statusPanel = $("statusPanel");
-const chatPlaceholder = $("chatPlaceholder");
-const messagesEl = $("messages");
-const backToRoles = $("backToRoles");
-
-/* =========================================================
-   ROLE SELECTION
-   ========================================================= */
-document.querySelectorAll(".role-card").forEach(card => {
-  card.addEventListener("click", () => selectRole(card.dataset.role));
-});
-
-function applyRoleTheme(role){
-  const m = ROLE_META[role];
-  document.documentElement.style.setProperty("--accent", m.accent);
-  document.documentElement.style.setProperty("--accent-soft", m.soft);
-}
-
-function selectRole(role){
-  state.role = role;
-  applyRoleTheme(role);
-  roleScreen.style.display = "none";
-  statusPanel.classList.add("visible");
-  chatPlaceholder.style.display = "none";
-  chatScreen.classList.add("visible");
-  backToRoles.style.display = "flex";
-
-  if (messagesEl.children.length === 0){
-    addAssistantText(You're set up as ${ROLE_META[role].label}. Ask me anything about the weather \u2014 I'll frame it for your work.);
-  }
-  if (!state.currentWeather) detectLocation();
-
-  if (state.user) persistUserPrefs();
-}
-
-backToRoles.addEventListener("click", () => {
-  roleScreen.style.display = "flex";
-  statusPanel.classList.remove("visible");
-  chatPlaceholder.style.display = "flex";
-  chatScreen.classList.remove("visible");
-  backToRoles.style.display = "none";
-});
-
-/* =========================================================
-   GEOLOCATION + WEATHER
-   ========================================================= */
-$("detectBtn").addEventListener("click", detectLocation);
-$("cityInput").addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && e.target.value.trim()){
-    fetchWeatherByCity(e.target.value.trim());
-  }
-});
-
-function detectLocation(){
-  $("cityName").textContent = "Detecting location\u2026";
-  if (!navigator.geolocation){
-    fetchWeatherByCity("Mumbai"); // graceful fallback
-    return;
-  }
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      state.coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
-      fetchWeatherByCoords(state.coords.lat, state.coords.lon);
-    },
-    () => { fetchWeatherByCity("Mumbai"); }, // permission denied / unavailable
-    { timeout: 8000 }
-  );
-}
-
-async function fetchWeatherByCoords(lat, lon){
-  if (state.demoMode) return applyDemoWeather();
-  try{
-    const res = await fetch(${WORKER_URL}/weather, {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ lat, lon })
-    });
-    const data = await res.json();
-    if (data && data.name) applyWeather(data);
-  }catch(e){ console.error(e); }
-}
-
-async function fetchWeatherByCity(city){
-  if (state.demoMode) return applyDemoWeather(city);
-  try{
-    const res = await fetch(${WORKER_URL}/weather, {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ city })
-    });
-    const data = await res.json();
-    if (data && data.name) applyWeather(data);
-    else $("cityName").textContent = "City not found";
-  }catch(e){ console.error(e); }
-}
-
-function applyWeather(data){
-  state.city = data.name;
-  state.currentWeather = data;
-  $("cityName").textContent = data.name + (data.sys && data.sys.country ? , ${data.sys.country} : "");
-  $("tempVal").textContent = Math.round(data.main.temp) + "\u00b0";
-  $("condText").textContent = data.weather && data.weather[0] ? data.weather[0].description : "\u2014";
-  $("humVal").textContent = data.main.humidity;
-  $("windVal").textContent = Math.round((data.wind.speed || 0) * 3.6);
-  drawSparkline(Math.round(data.main.temp));
-  if (state.user) persistUserPrefs();
-}
-
-function applyDemoWeather(city){
-  const demo = { name: city || "Demo City", main:{temp:29, humidity:64}, wind:{speed:3.6},
-    weather:[{description:"partly cloudy"}], sys:{country:"IN"} };
-  applyWeather(demo);
-}
-
-function drawSparkline(baseTemp){
-  const svg = $("sparkline");
-  const pts = [];
-  let t = baseTemp;
-  for (let i=0;i<8;i++){
-    t += (Math.random()-0.5)*2.2;
-    pts.push(t);
-  }
-  const min = Math.min(...pts), max = Math.max(...pts);
-  const norm = pts.map(v => max===min ? 17 : 30 - ((v-min)/(max-min))*26);
-  const step = 90/(pts.length-1);
-  const d = norm.map((y,i) => ${i===0?"M":"L"} ${i*step} ${y}).join(" ");
-  const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
-  svg.innerHTML = `
-    <path d="${d}" fill="none" stroke="${accent}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${(pts.length-1)*step}" cy="${norm[norm.length-1]}" r="2.4" fill="${accent}"/>
-  `;
-}
-
-/* =========================================================
-   CHAT SEND
-   ========================================================= */
-$("sendBtn").addEventListener("click", sendMessage);
-$("chatInput").addEventListener("keydown", (e) => { if (e.key === "Enter") sendMessage(); });
-
-function sendMessage(){
-  const input = $("chatInput");
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = "";
-  addUserText(text);
-  askWeatherGPT(text);
-}
-
-function addUserText(text){
-  const row = document.createElement("div");
-  row.className = "msg-row user";
-  row.innerHTML = <div class="avatar">&#128100;</div><div class="bubble"></div>;
-  row.querySelector(".bubble").textContent = text;
-  messagesEl.appendChild(row);
-  scrollToBottom();
-}
-
-function addAssistantText(text){
-  const row = document.createElement("div");
-  row.className = "msg-row assistant";
-  row.innerHTML = <div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div><div class="bubble"></div>;
-  row.querySelector(".bubble").textContent = text;
-  messagesEl.appendChild(row);
-  scrollToBottom();
-}
-
-function scrollToBottom(){ messagesEl.scrollTop = messagesEl.scrollHeight; }
-
-/* ---- scope guard (client-side, used in demo/offline mode) ---- */
-function isOnTopic(text){
-  const lower = text.toLowerCase();
-  return WEATHER_KEYWORDS.some(k => lower.includes(k));
-}
-
-/* ---- reasoning trace ---- */
-function showReasoningTrace(){
-  const row = document.createElement("div");
-  row.className = "msg-row assistant";
-  const steps = [
-    "Fetching live data",
-    "Analyzing for your role",
-    "Cross-referencing community reports",
-    "Generating response"
-  ];
-  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div>
-    <div class="trace-card">
-      ${steps.map((s,i)=><div class="trace-step" data-i="${i}"><div class="tick"></div><span>${s}</span></div>).join("")}
-    </div>`;
-  messagesEl.appendChild(row);
-  scrollToBottom();
-
-  const stepEls = row.querySelectorAll(".trace-step");
-  let i = 0;
-  const stepDelay = 480;
-  const interval = setInterval(() => {
-    if (i > 0) { stepEls[i-1].classList.remove("active"); stepEls[i-1].classList.add("done"); stepEls[i-1].querySelector(".tick").textContent = "\u2713"; }
-    if (i < stepEls.length) { stepEls[i].classList.add("active"); i++; }
-    else clearInterval(interval);
-  }, stepDelay);
-
-  return { row, minDurationMs: stepDelay * steps.length + 200 };
-}
-
-/* =========================================================
-   ASK \u2014 Gemini via Worker, or Demo Mode mock
-   ========================================================= */
-async function askWeatherGPT(userText){
-  const trace = showReasoningTrace();
-  const startedAt = Date.now();
-
-  let result;
-  if (state.demoMode){
-    result = mockAsk(userText);
-  } else {
-    result = await realAsk(userText);
-  }
-
-  const elapsed = Date.now() - startedAt;
-  const wait = Math.max(0, trace.minDurationMs - elapsed);
-  setTimeout(() => {
-    trace.row.remove();
-    renderAssistantResult(result);
-  }, wait);
-}
-
-function buildPrompt(userText){
-  return `You are WeatherGPT, a weather-only assistant for a ${state.role}.
-Current conditions for ${state.city || "the user's location"}: ${JSON.stringify(state.currentWeather ? {
-    temp: state.currentWeather.main.temp,
-    humidity: state.currentWeather.main.humidity,
-    wind_kmh: Math.round((state.currentWeather.wind.speed||0)*3.6),
-    condition: state.currentWeather.weather[0].description
-  } : "unknown")}.
-
-Rules:
-- ONLY answer questions about weather, climate, forecasts, or weather-related safety.
-- If the question is unrelated to weather, politely refuse and redirect the user back to weather topics.
-- Tailor "advice" specifically to a ${state.role}'s decisions (e.g. irrigation timing for farmers, go/no-go for fishermen, what to carry for general public).
-- Respond in strict JSON only, matching this schema exactly, no markdown fences:
-{"reply": string, "advice": string, "confidence": number (0-100), "confidence_reason": string, "is_alert": boolean, "alert_message": string}
-
-User message: "${userText}"`;
-}
-
-async function realAsk(userText){
-  if (!isOnTopic(userText) && !state.currentWeather){
-    // still let Gemini decide via prompt-level scope guard; client guard is
-    // a demo-mode fallback per spec, not a hard block on live calls.
-  }
-  try{
-    const res = await fetch(${WORKER_URL}/ask, {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify({ prompt: buildPrompt(userText) })
-    });
-    const data = await res.json();
-    const textPart = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    const parsed = JSON.parse(textPart);
-    return parsed;
-  }catch(e){
-    console.error(e);
-    return {
-      reply: "Sorry, I couldn't reach the weather service just now. Try again in a moment.",
-      advice: "", confidence: 0, confidence_reason: "", is_alert:false, alert_message:""
-    };
-  }
-}
-
-function mockAsk(userText){
-  if (!isOnTopic(userText)){
-    return { reply:"I can only help with weather, climate, and forecast questions \u2014 ask me about rain, temperature, wind, or safety conditions.",
-      advice:"", confidence:0, confidence_reason:"", is_alert:false, alert_message:"" };
-  }
-  const lower = userText.toLowerCase();
-  const adviceByRole = {
-    farmer:{ rain:"Hold off on irrigation for the next 24h \u2014 expected rainfall covers it.", heat:"Irrigate early morning or evening to reduce evaporation loss.", wind:"Delay any pesticide spraying until wind drops below 15 km/h." },
-    fisherman:{ rain:"Sea conditions manageable, but watch for sudden squalls near the coast.", heat:"Good visibility expected \u2014 standard trip conditions.", wind:"Wind gusts above safe threshold \u2014 consider delaying departure." },
-    general:{ rain:"Carry an umbrella and allow extra travel time.", heat:"Stay hydrated and avoid peak sun 12\u20133pm.", wind:"Secure loose outdoor items; light breeze otherwise fine." }
-  };
-  let category = "rain";
-  if (lower.includes("heat") || lower.includes("hot") || lower.includes("temp")) category = "heat";
-  if (lower.includes("wind") || lower.includes("storm") || lower.includes("cyclone")) category = "wind";
-
-  const isAlert = category === "wind" && (lower.includes("storm") || lower.includes("cyclone"));
-
-  return {
-    reply: Based on current conditions, expect ${category === "rain" ? "scattered rain" : category === "heat" ? "elevated temperatures" : "stronger winds"} today.,
-    advice: adviceByRole[state.role][category],
-    confidence: 72 + Math.floor(Math.random()*20),
-    confidence_reason: "Based on current local readings and short-range trend.",
-    is_alert: isAlert,
-    alert_message: isAlert ? "Strong wind conditions detected \u2014 exercise caution outdoors and near the coast." : ""
-  };
-}
-
-/* =========================================================
-   RENDER ASSISTANT RESULT (reply / teaser / advice / alert / verify)
-   ========================================================= */
-const pendingTeasers = []; // { id, result } — upgraded to full advice automatically on login
-
-function adviceBlockHtml(result){
-  return `
-      <div class="advice-block">
-        <div class="label">Your decision layer</div>
-        <div>${escapeHtml(result.advice)}</div>
-        <div class="confidence-bar-track"><div class="confidence-bar-fill" style="width:${result.confidence||0}%"></div></div>
-        <div class="confidence-reason">${result.confidence}% confidence \u2014 ${escapeHtml(result.confidence_reason||"")}</div>
-      </div>`;
-}
-
-function renderAssistantResult(result){
-  const row = document.createElement("div");
-  row.className = "msg-row assistant";
-
-  let inner = <div class="bubble">${escapeHtml(result.reply || "")}</div>;
-  let teaserId = null;
-
-  if (state.user && result.advice){
-    inner += adviceBlockHtml(result);
-  } else if (!state.user && result.advice){
-    teaserId = "teaser-" + Math.random().toString(36).slice(2);
-    inner += <div class="teaser-line" id="${teaserId}" onclick="openLoginModal()">&#128274; ${ROLE_META[state.role].label} ke liye ek specific decision hai \u2014 login karke free mein dekho &#8594;</div>;
-  }
-
-  row.innerHTML = <div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div><div style="display:flex;flex-direction:column;max-width:82%;">${inner}</div>;
-  messagesEl.appendChild(row);
-
-  if (teaserId){
-    pendingTeasers.push({ id: teaserId, result });
-  }
-
-  if (result.is_alert && result.alert_message){
-    renderAlertCard(result.alert_message, false);
-  }
-
-  scrollToBottom();
-}
-
-// called automatically right after login so any decisions shown as
-// locked teasers earlier in the session upgrade to the real advice
-// without the user needing to send a new message.
-function revealPendingTeasers(){
-  while (pendingTeasers.length){
-    const { id, result } = pendingTeasers.pop();
-    const el = document.getElementById(id);
-    if (el) el.outerHTML = adviceBlockHtml(result);
-  }
-}
-
-function escapeHtml(s){
-  const d = document.createElement("div");
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-/* =========================================================
-   ALERT CARD + COMMUNITY VERIFICATION
-   ========================================================= */
-function renderAlertCard(message, autoDetected){
-  const category = "general_alert";
-  const dateKey = new Date().toISOString().slice(0,10);
-  const docKey = ${(state.city||"unknown").replace(/\s+/g,"_")}_${category}_${dateKey};
-
-  const row = document.createElement("div");
-  row.className = "msg-row assistant";
-  row.innerHTML = `
-    <div class="avatar">&#9888;&#65039;</div>
-    <div class="alert-card" data-dockey="${docKey}">
-      ${autoDetected ? <div class="auto-tag">&#128276; Auto-detected \u00b7 no one asked</div> : ""}
-      <div class="alert-head">&#9888;&#65039; Weather Alert</div>
-      <div>${escapeHtml(message)}</div>
-      <div class="verify-row">
-        <span class="vcount">Loading confirmations\u2026</span>
-        <div class="verify-actions"></div>
+      <div class="switch-row">
+        <span id="switchModeText">New here? <span id="switchModeLink">Create an account</span></span>
       </div>
-    </div>`;
-  messagesEl.appendChild(row);
-  scrollToBottom();
+    </div>
+  </div>
 
-  loadVerification(docKey, row.querySelector(".alert-card"), category);
-}
+  <!-- Firebase Compat SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-async function loadVerification(docKey, cardEl, category){
-  const countEl = cardEl.querySelector(".vcount");
-  const actionsEl = cardEl.querySelector(".verify-actions");
-  try{
-    const snap = await db.collection("confirmations").doc(docKey).get();
-    const count = snap.exists ? (snap.data().count || 0) : 0;
-    countEl.textContent = ${count} people confirmed nearby;
-  }catch(e){
-    countEl.textContent = "Community reports unavailable";
-  }
-
-  if (!state.user){
-    actionsEl.innerHTML = <span class="verify-login" onclick="openLoginModal()">login to vote</span>;
-    pendingVerifyCards.push({ docKey, cardEl, category });
-    return;
-  }
-
-  actionsEl.innerHTML = <div class="verify-btns"><button class="yes">Yes</button><button class="no">No</button></div>;
-  actionsEl.querySelector(".yes").onclick = () => castVote(docKey, category, "yes", countEl);
-  actionsEl.querySelector(".no").onclick = () => castVote(docKey, category, "no", countEl);
-}
-
-// called automatically right after login so alert cards already showing
-// "login to vote" upgrade to real Yes/No buttons without a page reload.
-const pendingVerifyCards = []; // { docKey, cardEl, category }
-function refreshPendingVerifyCards(){
-  while (pendingVerifyCards.length){
-    const { docKey, cardEl, category } = pendingVerifyCards.pop();
-    if (document.body.contains(cardEl)) loadVerification(docKey, cardEl, category);
-  }
-}
-
-async function castVote(docKey, category, vote, countEl){
-  const uid = state.user.uid;
-  const voteRef = db.collection("confirmations").doc(docKey).collection("votes").doc(uid);
-  const existing = await voteRef.get();
-  if (existing.exists){
-    countEl.textContent = "You've already voted on this today";
-    return;
-  }
-  const confirmRef = db.collection("confirmations").doc(docKey);
-  await db.runTransaction(async (tx) => {
-    const doc = await tx.get(confirmRef);
-    const current = doc.exists ? (doc.data().count || 0) : 0;
-    tx.set(confirmRef, { count: vote === "yes" ? current + 1 : current, city: state.city, category }, { merge:true });
-    tx.set(voteRef, { vote, votedAt: firebase.firestore.FieldValue.serverTimestamp() });
-  });
-  const snap = await confirmRef.get();
-  countEl.textContent = ${snap.data().count || 0} people confirmed nearby;
-}
-
-/* =========================================================
-   DEMO MODE + LIVE MONITOR TOGGLES
-   ========================================================= */
-$("demoToggle").addEventListener("click", () => {
-  state.demoMode = !state.demoMode;
-  $("demoToggle").classList.toggle("on", state.demoMode);
-  if (state.demoMode) applyDemoWeather(state.city);
-  else detectLocation();
-});
-
-$("monitorToggle").addEventListener("click", () => {
-  state.monitorOn = !state.monitorOn;
-  $("monitorToggle").classList.toggle("on", state.monitorOn);
-  if (state.monitorOn) startMonitor();
-  else stopMonitor();
-});
-
-function startMonitor(){
-  stopMonitor();
-  const intervalMs = state.demoMode ? 8000 : 45000; // faster in demo, quota-friendly live
-  state.monitorTimer = setInterval(checkForSevereConditions, intervalMs);
-  checkForSevereConditions();
-}
-function stopMonitor(){
-  if (state.monitorTimer) clearInterval(state.monitorTimer);
-  state.monitorTimer = null;
-}
-
-async function checkForSevereConditions(){
-  let severe = false, message = "", key = "";
-
-  if (state.demoMode){
-    // randomly simulate a severe event in demo mode so the flow is visible
-    if (Math.random() < 0.3){
-      severe = true; key = "demo_wind_spike";
-      message = "Simulated: wind gusts have risen sharply in your area \u2014 small craft and outdoor work should take caution.";
-    }
-  } else {
-    if (state.coords) await fetchWeatherByCoords(state.coords.lat, state.coords.lon);
-    else if (state.city) await fetchWeatherByCity(state.city);
-    const w = state.currentWeather;
-    if (w){
-      const windKmh = (w.wind.speed || 0) * 3.6;
-      if (windKmh > 40){ severe = true; key = "wind_"+Math.round(windKmh/10); message = High wind detected: ${Math.round(windKmh)} km/h near ${state.city}.; }
-      else if (w.main.temp > 42){ severe = true; key = "heat_"+Math.round(w.main.temp/2); message = Extreme heat detected: ${Math.round(w.main.temp)}\u00b0C near ${state.city}.; }
-    }
-  }
-
-  if (!severe) return;
-
-  const COOLDOWN_MS = 10 * 60 * 1000;
-  const now = Date.now();
-  if (key === state.lastAlertKey && (now - state.lastAlertAt) < COOLDOWN_MS) return; // quota-aware cooldown
-
-  state.lastAlertKey = key;
-  state.lastAlertAt = now;
-  renderAlertCard(message, true);
-}
-
-/* =========================================================
-   AUTH \u2014 Firebase (email/password + Google)
-   ========================================================= */
-$("loginTrigger").addEventListener("click", () => {
-  if (state.user) toggleAccountMenu();
-  else openLoginModal();
-});
-$("closeModal").addEventListener("click", closeLoginModal);
-$("loginModal").addEventListener("click", (e) => { if (e.target.id === "loginModal") closeLoginModal(); });
-
-function openLoginModal(){ $("accountMenu").classList.remove("visible"); $("loginModal").classList.add("visible"); }
-function closeLoginModal(){ $("loginModal").classList.remove("visible"); $("modalErr").textContent=""; }
-
-function toggleAccountMenu(){ $("accountMenu").classList.toggle("visible"); }
-document.addEventListener("click", (e) => {
-  const menu = $("accountMenu");
-  if (!menu.classList.contains("visible")) return;
-  if (e.target.id === "loginTrigger" || menu.contains(e.target)) return;
-  menu.classList.remove("visible");
-});
-
-$("logoutBtn").addEventListener("click", async () => {
-  await auth.signOut();
-  $("accountMenu").classList.remove("visible");
-});
-
-$("switchModeLink").addEventListener("click", () => {
-  state.authMode = state.authMode === "login" ? "signup" : "login";
-  renderAuthMode();
-});
-function renderAuthMode(){
-  if (state.authMode === "login"){
-    $("modalTitle").textContent = "Welcome back";
-    $("modalSub").textContent = "Log in to see your role-specific decisions, not just the forecast.";
-    $("emailAuthBtn").textContent = "Continue";
-    $("switchModeText").innerHTML = New here? <span id="switchModeLink">Create an account</span>;
-  } else {
-    $("modalTitle").textContent = "Create your account";
-    $("modalSub").textContent = "Free \u2014 unlocks decisions, confidence scores, and community voting.";
-    $("emailAuthBtn").textContent = "Sign up";
-    $("switchModeText").innerHTML = Already have an account? <span id="switchModeLink">Log in</span>;
-  }
-  document.getElementById("switchModeLink").addEventListener("click", () => {
-    state.authMode = state.authMode === "login" ? "signup" : "login";
-    renderAuthMode();
-  });
-}
-
-$("emailAuthBtn").addEventListener("click", async () => {
-  const email = $("emailInput").value.trim();
-  const pass = $("passInput").value;
-  const errEl = $("modalErr");
-  errEl.textContent = "";
-  if (!email || !pass){ errEl.textContent = "Enter both email and password."; return; }
-  try{
-    if (state.authMode === "login"){
-      await auth.signInWithEmailAndPassword(email, pass);
-    } else {
-      await auth.createUserWithEmailAndPassword(email, pass);
-    }
-    closeLoginModal();
-  }catch(e){
-    errEl.textContent = humanizeAuthError(e);
-  }
-});
-
-$("googleAuthBtn").addEventListener("click", async () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  try{
-    await auth.signInWithPopup(provider);
-    closeLoginModal();
-  }catch(e){
-    $("modalErr").textContent = humanizeAuthError(e);
-  }
-});
-
-function humanizeAuthError(e){
-  const code = e && e.code || "";
-  if (code.includes("wrong-password") || code.includes("invalid-credential")) return "Incorrect email or password.";
-  if (code.includes("user-not-found")) return "No account found with that email.";
-  if (code.includes("email-already-in-use")) return "That email is already registered \u2014 try logging in.";
-  if (code.includes("weak-password")) return "Password should be at least 6 characters.";
-  return "Something went wrong. Please try again.";
-}
-
-auth.onAuthStateChanged(async (user) => {
-  state.user = user;
-  $("loginTrigger").classList.toggle("active", !!user);
-  $("loginTrigger").innerHTML = user ? "&#9989;" : "&#128100;";
-  $("accountEmail").textContent = user ? user.email : "";
-  if (user){
-    await loadUserPrefs();
-    revealPendingTeasers();
-    refreshPendingVerifyCards();
-  } else {
-    $("accountMenu").classList.remove("visible");
-  }
-});
-
-async function persistUserPrefs(){
-  if (!state.user) return;
-  try{
-    await db.collection("users").doc(state.user.uid).set({
-      email: state.user.email, role: state.role, city: state.city,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge:true });
-  }catch(e){ console.error(e); }
-}
-
-async function loadUserPrefs(){
-  try{
-    const snap = await db.collection("users").doc(state.user.uid).get();
-    if (snap.exists){
-      const d = snap.data();
-      if (d.role && !state.role) selectRole(d.role);
-      if (d.city && !state.currentWeather) fetchWeatherByCity(d.city);
-    }
-  }catch(e){ console.error(e); }
-}
-
-/* =========================================================
-   INIT
-   ========================================================= */
-renderAuthMode();
-</script>
+  <!-- Application Logic -->
+  <script src="app.js"></script>
 </body>
 </html>
