@@ -45,6 +45,11 @@ html, body {
   overflow-x: hidden;
 }
 
+img {
+  max-width: 100%;
+  height: auto;
+}
+
 .num, .brand, h1, h2, h3, .temp, .splash-title, .m-val {
   font-family: 'Space Grotesk', system-ui, sans-serif;
 }
@@ -81,22 +86,29 @@ html, body {
 
 .splash-logo-box {
   position: relative;
-  width: 90px;
-  height: 90px;
-  margin-bottom: 20px;
+  width: 80px;
+  height: 80px;
+  max-width: 80px;
+  max-height: 80px;
+  margin-bottom: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .splash-logo-img {
-  width: 84px;
-  height: 84px;
-  border-radius: 22px;
+  width: 76px !important;
+  height: 76px !important;
+  max-width: 76px !important;
+  max-height: 76px !important;
+  border-radius: 20px;
   object-fit: cover;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
   position: relative;
   z-index: 2;
+  flex-shrink: 0;
+  display: block;
 }
 
 .splash-logo-svg {
@@ -242,12 +254,16 @@ html, body {
 }
 
 .brand-logo-img {
-  width: 32px;
-  height: 32px;
-  border-radius: 9px;
+  width: 28px !important;
+  height: 28px !important;
+  max-width: 28px !important;
+  max-height: 28px !important;
+  border-radius: 8px;
   object-fit: cover;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.35);
+  box-shadow: 0 3px 10px rgba(0,0,0,0.35);
   border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+  display: inline-block;
 }
 
 .brand .dot {
@@ -989,12 +1005,16 @@ html, body {
 }
 
 .modal-logo-img {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
+  width: 48px !important;
+  height: 48px !important;
+  max-width: 48px !important;
+  max-height: 48px !important;
+  border-radius: 14px;
   object-fit: cover;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.45);
   border: 1px solid rgba(255,255,255,0.12);
+  flex-shrink: 0;
+  display: block;
 }
 
 .modal-close {
