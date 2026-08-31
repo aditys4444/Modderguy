@@ -6,6 +6,10 @@
   <title>WeatherGPT - Next-Gen Climate &amp; Decision Intelligence</title>
   <meta name="description" content="AI-powered climate and causal decision intelligence platform for Agriculture, Maritime Fisheries, and Everyday Life." />
 
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://iili.io/CyvRiX9.md.png" />
+  <link rel="apple-touch-icon" href="https://iili.io/CyvRiX9.md.png" />
+
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,24 +26,8 @@
   <div id="splashScreen" class="splash-screen">
     <div class="splash-content">
       <div class="splash-logo-box">
-        <!-- Custom Hosted Logo Image (Loads automatically if URL provided) -->
-        <img id="splashLogoImg" class="splash-logo-img" src="" alt="WeatherGPT Logo" style="display:none;" />
-        
-        <!-- High-res Animated Glow SVG Logo Fallback -->
-        <div id="splashLogoFallback" class="splash-logo-svg">
-          <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="36" cy="36" r="32" fill="url(#splashGrad)" stroke="rgba(232,163,61,0.4)" stroke-width="2"/>
-            <circle cx="28" cy="26" r="8" fill="#FFB94A" />
-            <path d="M24 44C24 38.4772 28.4772 34 34 34C39.0224 34 43.1818 37.697 43.8824 42.5446C46.7778 42.9234 49 45.4162 49 48.5C49 51.8137 46.3137 54.5 43 54.5H25C21.6863 54.5 19 51.8137 19 48.5C19 45.548 21.1344 43.0957 24 42.585V44Z" fill="#E8ECF4" opacity="0.95"/>
-            <path d="M30 48L36 38L42 48" stroke="#E8A33D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <radialGradient id="splashGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(36 36) rotate(90) scale(32)">
-                <stop stop-color="#1A2540"/>
-                <stop offset="1" stop-color="#0B1220"/>
-              </radialGradient>
-            </defs>
-          </svg>
-        </div>
+        <!-- WeatherGPT Hosted Official Logo -->
+        <img id="splashLogoImg" class="splash-logo-img" src="https://iili.io/CyvRiX9.md.png" alt="WeatherGPT Logo" />
         <div class="splash-glow"></div>
       </div>
 
@@ -66,7 +54,7 @@
           &#8592; <span class="nav-back-label" id="lblHomeBack">Home</span>
         </button>
         <div class="brand" id="brandTitle">
-          <span class="dot"></span>
+          <img src="https://iili.io/CyvRiX9.md.png" class="brand-logo-img" alt="WeatherGPT Logo" />
           <span>WeatherGPT</span>
           <span class="brand-badge" id="brandBadge">AI Intelligence</span>
         </div>
@@ -305,6 +293,12 @@
   <div id="loginModal" class="modal-backdrop">
     <div class="modal-card">
       <button class="modal-close" id="closeModal" aria-label="Close modal">&#10005;</button>
+      
+      <!-- Modal Logo Row -->
+      <div class="modal-logo-row">
+        <img src="https://iili.io/CyvRiX9.md.png" class="modal-logo-img" alt="WeatherGPT" />
+      </div>
+
       <h2 id="modalTitle">Welcome back</h2>
       <p class="sub" id="modalSub">Log in to unlock full decision layers, causal logic breakdowns, and community reports.</p>
       <div class="modal-err" id="modalErr"></div>

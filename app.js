@@ -4,7 +4,7 @@
 const WORKER_URL = "https://modderguy.cs63saurabh.workers.dev";
 
 // Paste your hosted custom Logo URL here anytime!
-const CUSTOM_LOGO_URL = ""; 
+const CUSTOM_LOGO_URL = "https://iili.io/CyvRiX9.md.png"; 
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDJQwi1VnqOkPPYrZbN4uRPsl0CbdNBpks",
