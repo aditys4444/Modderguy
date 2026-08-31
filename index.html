@@ -15,8 +15,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- Main Stylesheet -->
-  <link rel="stylesheet" href="style.css" />
+  <!-- Main Stylesheet with Cache Busting -->
+  <link rel="stylesheet" href="style.css?v=2.2" />
 </head>
 <body>
 
@@ -27,7 +27,7 @@
     <div class="splash-content">
       <div class="splash-logo-box">
         <!-- WeatherGPT Hosted Official Logo -->
-        <img id="splashLogoImg" class="splash-logo-img" src="https://iili.io/CyvRiX9.md.png" alt="WeatherGPT Logo" width="76" height="76" />
+        <img id="splashLogoImg" class="splash-logo-img" src="https://iili.io/CyvRiX9.md.png" alt="WeatherGPT Logo" width="76" height="76" style="width:76px;height:76px;max-width:76px;max-height:76px;" />
         <div class="splash-glow"></div>
       </div>
 
@@ -54,7 +54,7 @@
           &#8592; <span class="nav-back-label" id="lblHomeBack">Home</span>
         </button>
         <div class="brand" id="brandTitle">
-          <img src="https://iili.io/CyvRiX9.md.png" class="brand-logo-img" alt="WeatherGPT Logo" width="30" height="30" />
+          <img src="https://iili.io/CyvRiX9.md.png" class="brand-logo-img" alt="WeatherGPT Logo" width="28" height="28" style="width:28px;height:28px;max-width:28px;max-height:28px;" />
           <span>WeatherGPT</span>
           <span class="brand-badge" id="brandBadge">AI Intelligence</span>
         </div>
@@ -113,10 +113,15 @@
             </div>
           </div>
 
-          <!-- Quick City Search Bar -->
-          <div class="hero-search-bar">
-            <input id="cityInput" placeholder="Search any city, district or village…" autocomplete="off" />
-            <button id="detectBtn" title="Detect GPS Location">&#128204; GPS</button>
+          <!-- Quick City Search with Live Autocomplete Suggestions -->
+          <div class="search-wrapper">
+            <div class="hero-search-bar">
+              <input id="cityInput" placeholder="Search city, district or village (e.g. Mumbai, Pune, Patna)…" autocomplete="off" />
+              <button id="searchCityBtn" title="Search Location">&#128269;</button>
+              <button id="detectBtn" title="Detect GPS Location">&#128204; GPS</button>
+            </div>
+            <!-- Live Autocomplete Suggestions Floating Dropdown -->
+            <div id="citySuggestions" class="city-suggestions-dropdown" style="display:none;"></div>
           </div>
         </div>
 
@@ -179,23 +184,23 @@
           </div>
         </div>
 
-        <!-- Product Value Prop Highlights -->
+        <!-- Product Value Prop Highlights (Clickable Feature Insights) -->
         <div class="product-features-row">
-          <div class="feature-item">
+          <div class="feature-item" id="featCausal" title="Learn about Causal AI">
             <span class="f-icon">🧠</span>
             <div>
               <strong>Causal Logic AI</strong>
               <p>Direct cause-and-effect science (Kyun &amp; Kaise)</p>
             </div>
           </div>
-          <div class="feature-item">
+          <div class="feature-item" id="featAqi" title="View live sensor telemetry">
             <span class="f-icon">🌫️</span>
             <div>
               <strong>Live AQI &amp; Sensors</strong>
               <p>Real-time PM2.5, UV, and gust telemetry</p>
             </div>
           </div>
-          <div class="feature-item">
+          <div class="feature-item" id="featCrowd" title="Learn about crowd ground-truth">
             <span class="f-icon">👥</span>
             <div>
               <strong>Crowd Verification</strong>
@@ -214,6 +219,11 @@
           <div class="active-persona-pill">
             <span class="persona-dot"></span>
             <span id="activePersonaLabel">Active Console: Farmer</span>
+          </div>
+          <div class="console-city-badge" id="consoleCityBtn" title="Click to search or change location">
+            <span class="pin">&#128205;</span>
+            <span id="consoleCityName">Location</span>
+            <span class="edit-pill">&#9998; Change</span>
           </div>
           <div class="console-toggles">
             <button class="toggle-chip" id="demoToggle"><span class="led"></span><span id="demoToggleText">Demo mode</span></button>
@@ -275,7 +285,7 @@
         <!-- Chat Timeline & Causal Decision Feed -->
         <div id="messages" class="chat-messages-container"></div>
 
-        <!-- Composer Bar -->
+        <!-- Composer Bar (Fixed bottom anchor) -->
         <div id="composer" class="chat-composer">
           <input id="chatInput" placeholder="Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai? Run pe jaun?)" autocomplete="off" />
           <button id="sendBtn" title="Send message" aria-label="Send">
@@ -288,6 +298,26 @@
   </div>
 
   <!-- =========================================================
+       LOCATION SEARCH MODAL (Quick change in Console Screen)
+       ========================================================= -->
+  <div id="cityModal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close" id="closeCityModal" aria-label="Close modal">&#10005;</button>
+      <h2>Select Location</h2>
+      <p class="sub">Search any city, district or village across India or worldwide.</p>
+      
+      <div class="search-wrapper">
+        <div class="hero-search-bar" style="margin-bottom:10px;">
+          <input id="modalCityInput" placeholder="Type city (e.g. Mumbai, Pune, Patna)…" autocomplete="off" />
+          <button id="modalSearchBtn">&#128269;</button>
+          <button id="modalGpsBtn">&#128204; GPS</button>
+        </div>
+        <div id="modalCitySuggestions" class="modal-city-suggestions"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
        AUTHENTICATION MODAL
        ========================================================= -->
   <div id="loginModal" class="modal-backdrop">
@@ -296,7 +326,7 @@
       
       <!-- Modal Logo Row -->
       <div class="modal-logo-row">
-        <img src="https://iili.io/CyvRiX9.md.png" class="modal-logo-img" alt="WeatherGPT" width="48" height="48" />
+        <img src="https://iili.io/CyvRiX9.md.png" class="modal-logo-img" alt="WeatherGPT" width="48" height="48" style="width:48px;height:48px;max-width:48px;max-height:48px;" />
       </div>
 
       <h2 id="modalTitle">Welcome back</h2>
@@ -321,7 +351,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
-  <!-- Application Logic -->
-  <script src="app.js"></script>
+  <!-- Application Logic with Cache Busting -->
+  <script src="app.js?v=2.2"></script>
 </body>
 </html>
