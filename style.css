@@ -96,7 +96,7 @@ body {
 
 /* ---- Header ---- */
 header {
-  padding: 16px 20px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -104,12 +104,12 @@ header {
 }
 
 .brand {
-  font-size: 19px;
+  font-size: 18px;
   font-weight: 700;
   letter-spacing: -0.01em;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .brand .dot {
@@ -121,10 +121,10 @@ header {
 }
 
 .brand-badge {
-  font-size: 10px;
+  font-size: 9.5px;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  padding: 2px 7px;
+  padding: 2px 6px;
   border-radius: 6px;
   background: var(--accent-soft);
   color: var(--accent);
@@ -137,6 +137,36 @@ header {
   gap: 8px;
   align-items: center;
   position: relative;
+}
+
+/* Language Selector */
+.lang-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.lang-select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 12px;
+  font-family: 'Inter', sans-serif;
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  outline: none;
+  transition: all .15s ease;
+}
+
+.lang-select:hover, .lang-select:focus {
+  border-color: var(--accent);
+  background: var(--surface-3);
+}
+
+.lang-select option {
+  background: var(--surface-2);
+  color: var(--text);
 }
 
 .icon-btn {
@@ -608,26 +638,56 @@ header {
 .confidence-bar-fill { height: 100%; background: var(--accent); border-radius: 99px; }
 .confidence-reason { color: var(--text-dim); font-size: 11px; }
 
+/* ---- Community Verification Styling ---- */
 .verify-row {
   margin-top: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 12px;
+  gap: 8px;
 }
-.verify-row .vcount { color: var(--text-dim); }
-.verify-btns { display: flex; gap: 6px; }
+.verify-row .vcount { color: var(--text-dim); flex: 1; }
+.verify-btns { display: flex; gap: 6px; align-items: center; }
 .verify-btns button {
   border: 1px solid var(--border);
   background: var(--surface);
   color: var(--text-dim);
   border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 11.5px;
+  padding: 5px 11px;
+  font-size: 12px;
   cursor: pointer;
+  font-weight: 500;
+  transition: all .15s ease;
 }
-.verify-btns button.yes:hover { border-color: var(--ok); color: var(--ok); }
-.verify-btns button.no:hover  { border-color: var(--danger); color: var(--danger); }
+.verify-btns button:disabled {
+  opacity: 0.85;
+  cursor: default;
+}
+.verify-btns button.yes:hover:not(:disabled) { border-color: var(--ok); color: var(--ok); background: rgba(79, 191, 139, 0.1); }
+.verify-btns button.no:hover:not(:disabled)  { border-color: var(--danger); color: var(--danger); background: rgba(224, 86, 107, 0.1); }
+
+.verify-btns button.voted-yes {
+  background: rgba(79, 191, 139, 0.2) !important;
+  color: #4FBF8B !important;
+  border-color: #4FBF8B !important;
+  font-weight: 600;
+}
+.verify-btns button.voted-no {
+  background: rgba(224, 86, 107, 0.2) !important;
+  color: #E0566B !important;
+  border-color: #E0566B !important;
+  font-weight: 600;
+}
+
+.voted-badge {
+  font-size: 11px;
+  color: var(--ok);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 .verify-login { color: var(--accent); cursor: pointer; font-size: 11.5px; text-decoration: underline; }
 
 /* ---- Reasoning Trace ---- */

@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>WeatherGPT - Role-Based Weather AI</title>
-  <meta name="description" content="AI weather advisor tailored for Farmers, Fishermen, and Everyday decisions with live AQI, UV, Wind, and Causal Logic." />
+  <meta name="description" content="AI weather advisor tailored for Farmers, Fishermen, and Everyday decisions with live AQI, UV, Wind, and Causal Logic in Hinglish, Hindi, and English." />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -25,6 +25,15 @@
         <span class="brand-badge">Intelligence AI</span>
       </div>
       <div class="header-actions">
+        <!-- Language Selector -->
+        <div class="lang-wrapper">
+          <select id="langSelect" class="lang-select" title="Choose Language" aria-label="Select Language">
+            <option value="hinglish">🌐 Hinglish</option>
+            <option value="hindi">🌐 हिन्दी (Hindi)</option>
+            <option value="english">🌐 English</option>
+          </select>
+        </div>
+
         <button class="icon-btn" id="loginTrigger" title="Account" aria-label="Account">&#128100;</button>
         <button class="icon-btn" id="backToRoles" title="Change Role" style="display:none;" aria-label="Change Role">&#8635;</button>
 
@@ -43,29 +52,29 @@
         <!-- Role Selection Screen -->
         <section id="roleScreen">
           <div>
-            <h1>Weather that talks your language.</h1>
-            <p class="sub">Pick who you are &mdash; decisions, causal logic, AQI, and alerts are tuned specifically to your work.</p>
+            <h1 id="heroTitle">Weather that talks your language.</h1>
+            <p class="sub" id="heroSub">Pick who you are &mdash; decisions, causal logic, AQI, and alerts are tuned specifically to your work.</p>
           </div>
           <div class="role-grid">
             <div class="role-card" data-role="farmer">
               <div class="role-icon">&#127806;</div>
               <div>
-                <div class="role-name">Farmer / Kisaan</div>
-                <div class="role-desc">Irrigation timing, spray drift safety, sowing windows &amp; crop risks</div>
+                <div class="role-name" id="roleFarmerName">Farmer / Kisaan</div>
+                <div class="role-desc" id="roleFarmerDesc">Irrigation timing, spray drift safety, sowing windows &amp; crop risks</div>
               </div>
             </div>
             <div class="role-card" data-role="fisherman">
               <div class="role-icon">&#127907;</div>
               <div>
-                <div class="role-name">Fisherman / Sagar Mitra</div>
-                <div class="role-desc">Wind gusts, swell height, sea roughness &amp; go/no-go water safety</div>
+                <div class="role-name" id="roleFishermanName">Fisherman / Sagar Mitra</div>
+                <div class="role-desc" id="roleFishermanDesc">Wind gusts, swell height, sea roughness &amp; go/no-go water safety</div>
               </div>
             </div>
             <div class="role-card" data-role="general">
               <div class="role-icon">&#9728;&#65039;</div>
               <div>
-                <div class="role-name">General Public / Daily Life</div>
-                <div class="role-desc">AQI health risks, travel advisories, what to wear &amp; carry</div>
+                <div class="role-name" id="roleGeneralName">General Public / Daily Life</div>
+                <div class="role-desc" id="roleGeneralDesc">AQI health risks, travel advisories, what to wear &amp; carry</div>
               </div>
             </div>
           </div>
@@ -102,42 +111,42 @@
             <div class="metric-card">
               <span class="m-icon">&#128168;</span>
               <div class="m-data">
-                <span class="m-label">Wind &amp; Gusts</span>
+                <span class="m-label" id="lblWind">Wind &amp; Gusts</span>
                 <span class="m-val" id="windVal">-- km/h</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="m-icon">&#128167;</span>
               <div class="m-data">
-                <span class="m-label">Humidity</span>
+                <span class="m-label" id="lblHum">Humidity</span>
                 <span class="m-val" id="humVal">--%</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="m-icon">&#9728;&#65039;</span>
               <div class="m-data">
-                <span class="m-label">UV Index</span>
+                <span class="m-label" id="lblUv">UV Index</span>
                 <span class="m-val" id="uvVal">-- (Low)</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="m-icon">&#127783;&#65039;</span>
               <div class="m-data">
-                <span class="m-label">Rain Chance</span>
+                <span class="m-label" id="lblRain">Rain Chance</span>
                 <span class="m-val" id="rainChanceVal">--%</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="m-icon">&#128065;&#65039;</span>
               <div class="m-data">
-                <span class="m-label">Visibility</span>
+                <span class="m-label" id="lblVis">Visibility</span>
                 <span class="m-val" id="visVal">-- km</span>
               </div>
             </div>
             <div class="metric-card">
               <span class="m-icon">&#9729;&#65039;</span>
               <div class="m-data">
-                <span class="m-label">Air Particulate</span>
+                <span class="m-label" id="lblPm">Air Particulate</span>
                 <span class="m-val" id="pmVal">PM2.5: --</span>
               </div>
             </div>
@@ -145,8 +154,8 @@
 
           <!-- Toggles -->
           <div id="toggleRow">
-            <button class="toggle-chip" id="demoToggle"><span class="led"></span>Demo mode</button>
-            <button class="toggle-chip" id="monitorToggle"><span class="led"></span>Live monitor</button>
+            <button class="toggle-chip" id="demoToggle"><span class="led"></span><span id="demoToggleText">Demo mode</span></button>
+            <button class="toggle-chip" id="monitorToggle"><span class="led"></span><span id="monitorToggleText">Live monitor</span></button>
           </div>
         </section>
       </aside>
@@ -155,7 +164,7 @@
       <main id="chatScreen">
         <div id="chatPlaceholder">
           <div class="ph-icon">&#127777;&#65039;</div>
-          <div>Pick a role on the left to activate hyper-logical AI advisory.</div>
+          <div id="phText">Pick a role on the left to activate hyper-logical AI advisory.</div>
         </div>
 
         <div id="messages"></div>
