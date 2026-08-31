@@ -2,30 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WeatherGPT - Role-Based Weather AI</title>
-  <meta name="description" content="AI weather advisor tailored for Farmers, Fishermen, and Everyday decisions with live AQI, UV, Wind, and Causal Logic in Hinglish, Hindi, and English." />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>WeatherGPT - Next-Gen Climate &amp; Decision Intelligence</title>
+  <meta name="description" content="AI-powered climate and causal decision intelligence platform for Agriculture, Maritime Fisheries, and Everyday Life." />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Main Stylesheet -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
 
-  <div id="app">
-    <!-- Header -->
-    <header>
-      <div class="brand">
-        <span class="dot"></span>
-        <span>WeatherGPT</span>
-        <span class="brand-badge" id="brandBadge">Intelligence AI</span>
+  <!-- =========================================================
+       APP SPLASH / LOADING SCREEN
+       ========================================================= -->
+  <div id="splashScreen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo-box">
+        <!-- Custom Hosted Logo Image (Loads automatically if URL provided) -->
+        <img id="splashLogoImg" class="splash-logo-img" src="" alt="WeatherGPT Logo" style="display:none;" />
+        
+        <!-- High-res Animated Glow SVG Logo Fallback -->
+        <div id="splashLogoFallback" class="splash-logo-svg">
+          <svg viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="36" cy="36" r="32" fill="url(#splashGrad)" stroke="rgba(232,163,61,0.4)" stroke-width="2"/>
+            <circle cx="28" cy="26" r="8" fill="#FFB94A" />
+            <path d="M24 44C24 38.4772 28.4772 34 34 34C39.0224 34 43.1818 37.697 43.8824 42.5446C46.7778 42.9234 49 45.4162 49 48.5C49 51.8137 46.3137 54.5 43 54.5H25C21.6863 54.5 19 51.8137 19 48.5C19 45.548 21.1344 43.0957 24 42.585V44Z" fill="#E8ECF4" opacity="0.95"/>
+            <path d="M30 48L36 38L42 48" stroke="#E8A33D" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <radialGradient id="splashGrad" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(36 36) rotate(90) scale(32)">
+                <stop stop-color="#1A2540"/>
+                <stop offset="1" stop-color="#0B1220"/>
+              </radialGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="splash-glow"></div>
       </div>
+
+      <h1 class="splash-title">Weather<span class="highlight">GPT</span></h1>
+      <p class="splash-subtitle" id="splashSub">Climate &amp; Causal Decision Intelligence</p>
+
+      <div class="splash-loader-box">
+        <div class="splash-progress-track">
+          <div class="splash-progress-bar" id="splashProgressBar"></div>
+        </div>
+        <span class="splash-status-text" id="splashStatusText">Initializing sensors &amp; live radar feeds…</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================
+       MAIN APPLICATION SHELL
+       ========================================================= -->
+  <div id="app">
+    <!-- Top Global App Bar -->
+    <header class="app-header">
+      <div class="header-left">
+        <button class="nav-back-btn" id="homeNavBtn" title="Back to Home" style="display:none;" aria-label="Home">
+          &#8592; <span class="nav-back-label" id="lblHomeBack">Home</span>
+        </button>
+        <div class="brand" id="brandTitle">
+          <span class="dot"></span>
+          <span>WeatherGPT</span>
+          <span class="brand-badge" id="brandBadge">AI Intelligence</span>
+        </div>
+      </div>
+
       <div class="header-actions">
-        <!-- Language Selector -->
+        <!-- Language Switcher -->
         <div class="lang-wrapper">
           <select id="langSelect" class="lang-select" title="Choose Language" aria-label="Select Language">
             <option value="hinglish">🌐 Hinglish</option>
@@ -34,8 +82,7 @@
           </select>
         </div>
 
-        <button class="icon-btn" id="loginTrigger" title="Account" aria-label="Account">&#128100;</button>
-        <button class="icon-btn" id="backToRoles" title="Change Role" style="display:none;" aria-label="Change Role">&#8635;</button>
+        <button class="icon-btn" id="loginTrigger" title="Account Status" aria-label="Account">&#128100;</button>
 
         <!-- Account Dropdown Menu -->
         <div id="accountMenu" class="dropdown-menu">
@@ -45,139 +92,216 @@
       </div>
     </header>
 
-    <!-- Main Layout -->
-    <div id="layout">
-      <!-- Sidebar -->
-      <aside id="sidebar">
-        <!-- Role Selection Screen -->
-        <section id="roleScreen">
-          <div>
-            <h1 id="heroTitle">Weather that talks your language.</h1>
-            <p class="sub" id="heroSub">Pick who you are &mdash; decisions, causal logic, AQI, and alerts are tuned specifically to your work.</p>
-          </div>
-          <div class="role-grid">
-            <div class="role-card" data-role="farmer">
-              <div class="role-icon">&#127806;</div>
-              <div>
-                <div class="role-name" id="roleFarmerName">Farmer / Kisaan</div>
-                <div class="role-desc" id="roleFarmerDesc">Irrigation timing, spray drift safety, sowing windows &amp; crop risks</div>
-              </div>
-            </div>
-            <div class="role-card" data-role="fisherman">
-              <div class="role-icon">&#127907;</div>
-              <div>
-                <div class="role-name" id="roleFishermanName">Fisherman / Sagar Mitra</div>
-                <div class="role-desc" id="roleFishermanDesc">Wind gusts, swell height, sea roughness &amp; go/no-go water safety</div>
-              </div>
-            </div>
-            <div class="role-card" data-role="general">
-              <div class="role-icon">&#9728;&#65039;</div>
-              <div>
-                <div class="role-name" id="roleGeneralName">General Public / Daily Life</div>
-                <div class="role-desc" id="roleGeneralDesc">AQI health risks, travel advisories, what to wear &amp; carry</div>
-              </div>
-            </div>
-          </div>
-        </section>
+    <!-- Main Viewports Router -->
+    <div id="mainLayout">
 
-        <!-- Status & Live Conditions Panel -->
-        <section id="statusPanel">
-          <!-- Primary Conditions -->
-          <div id="conditionsStrip">
-            <div class="main-cond-info">
-              <div class="city-row" id="cityRow">&#128205; <span id="cityName">Detecting location&hellip;</span></div>
-              <div class="temp-block">
-                <span class="temp" id="tempVal">--&deg;</span>
-                <span class="feels-like" id="feelsLikeVal">Feels --&deg;</span>
-              </div>
-              <div class="cond-text" id="condText">&mdash;</div>
-              <div class="city-controls">
-                <input id="cityInput" placeholder="Search city or village&hellip;" />
-                <button id="detectBtn" title="Detect Current GPS Location">&#128204;</button>
-              </div>
+      <!-- =======================================================
+           SCREEN 1: PRODUCT HOME & PERSONA SELECTION
+           ======================================================= -->
+      <section id="homeScreen" class="view-screen active-screen">
+        <!-- Live Atmospheric Overview Hero Card -->
+        <div class="hero-weather-card">
+          <div class="hero-card-header">
+            <div class="city-badge" id="cityRow">
+              <span class="pin">&#128205;</span>
+              <span id="cityName">Detecting location…</span>
             </div>
-            <div class="sparkline-wrapper">
-              <svg id="sparkline" width="90" height="34" viewBox="0 0 90 34"></svg>
-              <!-- AQI Live Pill -->
-              <div class="aqi-badge aqi-good" id="aqiBadge">
-                <span class="aqi-dot"></span>
-                <span id="aqiText">AQI -- · Detecting</span>
-              </div>
+            <div class="aqi-badge aqi-good" id="aqiBadge">
+              <span class="aqi-dot"></span>
+              <span id="aqiText">AQI -- · Detecting</span>
             </div>
           </div>
 
-          <!-- Extended Live Parameters Grid -->
-          <div id="metricsGrid">
-            <div class="metric-card">
-              <span class="m-icon">&#128168;</span>
-              <div class="m-data">
-                <span class="m-label" id="lblWind">Wind &amp; Gusts</span>
-                <span class="m-val" id="windVal">-- km/h</span>
+          <div class="hero-temp-row">
+            <div class="temp-big-block">
+              <span class="temp" id="tempVal">--°</span>
+              <div class="temp-meta">
+                <span class="feels-like" id="feelsLikeVal">Feels --°</span>
+                <span class="cond-text" id="condText">—</span>
               </div>
             </div>
-            <div class="metric-card">
-              <span class="m-icon">&#128167;</span>
-              <div class="m-data">
-                <span class="m-label" id="lblHum">Humidity</span>
-                <span class="m-val" id="humVal">--%</span>
-              </div>
+            <div class="sparkline-box">
+              <svg id="sparkline" width="100" height="38" viewBox="0 0 100 38"></svg>
             </div>
-            <div class="metric-card">
-              <span class="m-icon">&#9728;&#65039;</span>
-              <div class="m-data">
-                <span class="m-label" id="lblUv">UV Index</span>
-                <span class="m-val" id="uvVal">-- (Low)</span>
+          </div>
+
+          <!-- Quick City Search Bar -->
+          <div class="hero-search-bar">
+            <input id="cityInput" placeholder="Search any city, district or village…" autocomplete="off" />
+            <button id="detectBtn" title="Detect GPS Location">&#128204; GPS</button>
+          </div>
+        </div>
+
+        <!-- Persona Intelligence Selector -->
+        <div class="section-title-box">
+          <h2 id="heroTitle">Weather that talks your language.</h2>
+          <p class="section-sub" id="heroSub">Pick your role — advice, causal logic, AQI, and alerts are framed specifically for your decisions.</p>
+        </div>
+
+        <div class="persona-grid">
+          <!-- Farmer Persona Card -->
+          <div class="persona-card" data-role="farmer">
+            <div class="card-glow"></div>
+            <div class="persona-icon-box farmer-icon">🌾</div>
+            <div class="persona-body">
+              <div class="persona-title-row">
+                <h3 class="role-name" id="roleFarmerName">Farmer / Kisaan</h3>
+                <span class="persona-tag tag-farmer">Agri Intelligence</span>
               </div>
-            </div>
-            <div class="metric-card">
-              <span class="m-icon">&#127783;&#65039;</span>
-              <div class="m-data">
-                <span class="m-label" id="lblRain">Rain Chance</span>
-                <span class="m-val" id="rainChanceVal">--%</span>
-              </div>
-            </div>
-            <div class="metric-card">
-              <span class="m-icon">&#128065;&#65039;</span>
-              <div class="m-data">
-                <span class="m-label" id="lblVis">Visibility</span>
-                <span class="m-val" id="visVal">-- km</span>
-              </div>
-            </div>
-            <div class="metric-card">
-              <span class="m-icon">&#9729;&#65039;</span>
-              <div class="m-data">
-                <span class="m-label" id="lblPm">Air Particulate</span>
-                <span class="m-val" id="pmVal">PM2.5: --</span>
+              <p class="role-desc" id="roleFarmerDesc">Spray drift limits, irrigation timing, sowing windows &amp; crop disease risk</p>
+              <div class="persona-action-btn">
+                <span class="btn-text" id="btnLaunchFarmer">Open Farmer Console</span>
+                <span class="btn-arrow">&#8594;</span>
               </div>
             </div>
           </div>
 
-          <!-- Toggles -->
-          <div id="toggleRow">
+          <!-- Fisherman Persona Card -->
+          <div class="persona-card" data-role="fisherman">
+            <div class="card-glow"></div>
+            <div class="persona-icon-box fisherman-icon">🎣</div>
+            <div class="persona-body">
+              <div class="persona-title-row">
+                <h3 class="role-name" id="roleFishermanName">Fisherman / Sagar Mitra</h3>
+                <span class="persona-tag tag-fisherman">Marine Safety</span>
+              </div>
+              <p class="role-desc" id="roleFishermanDesc">Wind gusts, swell height, sea roughness &amp; go/no-go water safety</p>
+              <div class="persona-action-btn">
+                <span class="btn-text" id="btnLaunchFisherman">Open Marine Console</span>
+                <span class="btn-arrow">&#8594;</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- General Public Persona Card -->
+          <div class="persona-card" data-role="general">
+            <div class="card-glow"></div>
+            <div class="persona-icon-box general-icon">☀️</div>
+            <div class="persona-body">
+              <div class="persona-title-row">
+                <h3 class="role-name" id="roleGeneralName">General Public / Daily Life</h3>
+                <span class="persona-tag tag-general">Daily &amp; Health</span>
+              </div>
+              <p class="role-desc" id="roleGeneralDesc">AQI particulate risks, UV protection, rain windows &amp; what to carry</p>
+              <div class="persona-action-btn">
+                <span class="btn-text" id="btnLaunchGeneral">Open General Console</span>
+                <span class="btn-arrow">&#8594;</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Value Prop Highlights -->
+        <div class="product-features-row">
+          <div class="feature-item">
+            <span class="f-icon">🧠</span>
+            <div>
+              <strong>Causal Logic AI</strong>
+              <p>Direct cause-and-effect science (Kyun &amp; Kaise)</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="f-icon">🌫️</span>
+            <div>
+              <strong>Live AQI &amp; Sensors</strong>
+              <p>Real-time PM2.5, UV, and gust telemetry</p>
+            </div>
+          </div>
+          <div class="feature-item">
+            <span class="f-icon">👥</span>
+            <div>
+              <strong>Crowd Verification</strong>
+              <p>Ground-truth community confirmations</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- =======================================================
+           SCREEN 2: ACTIVE INTELLIGENCE & CHAT CONSOLE
+           ======================================================= -->
+      <section id="consoleScreen" class="view-screen">
+        <!-- Active Console Persona Sub-Header -->
+        <div class="console-sub-bar">
+          <div class="active-persona-pill">
+            <span class="persona-dot"></span>
+            <span id="activePersonaLabel">Active Console: Farmer</span>
+          </div>
+          <div class="console-toggles">
             <button class="toggle-chip" id="demoToggle"><span class="led"></span><span id="demoToggleText">Demo mode</span></button>
             <button class="toggle-chip" id="monitorToggle"><span class="led"></span><span id="monitorToggleText">Live monitor</span></button>
           </div>
-        </section>
-      </aside>
-
-      <!-- Chat Screen -->
-      <main id="chatScreen">
-        <div id="chatPlaceholder">
-          <div class="ph-icon">&#127777;&#65039;</div>
-          <div id="phText">Pick a role on the left to activate hyper-logical AI advisory.</div>
         </div>
 
-        <div id="messages"></div>
+        <!-- 6-Metric Live Sensor Telemetry HUD -->
+        <div id="metricsGrid" class="metrics-hud">
+          <div class="metric-card">
+            <span class="m-icon">&#128168;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblWind">Wind &amp; Gusts</span>
+              <span class="m-val" id="windVal">-- km/h</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="m-icon">&#128167;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblHum">Humidity</span>
+              <span class="m-val" id="humVal">--%</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="m-icon">&#9728;&#65039;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblUv">UV Index</span>
+              <span class="m-val" id="uvVal">-- (Low)</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="m-icon">&#127783;&#65039;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblRain">Rain Chance</span>
+              <span class="m-val" id="rainChanceVal">--%</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="m-icon">&#128065;&#65039;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblVis">Visibility</span>
+              <span class="m-val" id="visVal">-- km</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <span class="m-icon">&#9729;&#65039;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblPm">Air Particulate</span>
+              <span class="m-val" id="pmVal">PM2.5: --</span>
+            </div>
+          </div>
+        </div>
 
-        <div id="composer">
+        <!-- Smart 1-Click Prompt Suggestions Strip -->
+        <div class="suggestion-chips-container" id="suggestionChips">
+          <!-- Dynamically populated per active role -->
+        </div>
+
+        <!-- Chat Timeline & Causal Decision Feed -->
+        <div id="messages" class="chat-messages-container"></div>
+
+        <!-- Composer Bar -->
+        <div id="composer" class="chat-composer">
           <input id="chatInput" placeholder="Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai? Run pe jaun?)" autocomplete="off" />
-          <button id="sendBtn" title="Send message" aria-label="Send">&#10148;</button>
+          <button id="sendBtn" title="Send message" aria-label="Send">
+            <span class="send-icon">&#10148;</span>
+          </button>
         </div>
-      </main>
+      </section>
+
     </div>
   </div>
 
-  <!-- Login Modal -->
+  <!-- =========================================================
+       AUTHENTICATION MODAL
+       ========================================================= -->
   <div id="loginModal" class="modal-backdrop">
     <div class="modal-card">
       <button class="modal-close" id="closeModal" aria-label="Close modal">&#10005;</button>

@@ -1,7 +1,10 @@
 /* =========================================================
-   CONFIG — Replace these values before deploying
+   CONFIG — WeatherGPT Configuration & Logo Settings
    ========================================================= */
 const WORKER_URL = "https://modderguy.cs63saurabh.workers.dev";
+
+// Paste your hosted custom Logo URL here anytime!
+const CUSTOM_LOGO_URL = ""; 
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDJQwi1VnqOkPPYrZbN4uRPsl0CbdNBpks",
@@ -18,24 +21,28 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 /* =========================================================
-   I18N / MULTI-LANGUAGE DICTIONARY
+   I18N / MULTI-LANGUAGE SYSTEM
    ========================================================= */
 const I18N = {
   hinglish: {
-    brandSubtitle: "Intelligence AI",
+    brandSubtitle: "AI Intelligence",
     heroTitle: "Weather that talks your language.",
-    heroSub: "Pick who you are — decisions, causal logic, AQI, and alerts are tuned specifically to your work.",
+    heroSub: "Pick your role — advice, causal logic, AQI, and alerts are framed specifically for your decisions.",
     farmerName: "Farmer / Kisaan",
-    farmerDesc: "Irrigation timing, spray drift safety, sowing windows & crop risks",
+    farmerDesc: "Spray drift limits, irrigation timing, sowing windows & crop disease risk",
+    btnLaunchFarmer: "Open Farmer Console",
     fishermanName: "Fisherman / Sagar Mitra",
     fishermanDesc: "Wind gusts, swell height, sea roughness & go/no-go water safety",
+    btnLaunchFisherman: "Open Marine Console",
     generalName: "General Public / Daily Life",
-    generalDesc: "AQI health risks, travel advisories, what to wear & carry",
+    generalDesc: "AQI particulate risks, UV protection, rain windows & what to carry",
+    btnLaunchGeneral: "Open General Console",
     detectingLoc: "Detecting location…",
-    searchPlaceholder: "Search city or village…",
+    searchPlaceholder: "Search any city, district or village…",
     feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai?)",
-    pickRolePlaceholder: "Pick a role on the left to activate hyper-logical AI advisory.",
+    lblHomeBack: "Home",
+    activeConsolePrefix: "Active Console:",
     demoBtn: "Demo mode",
     monitorBtn: "Live monitor",
     lblWind: "Wind & Gusts",
@@ -44,7 +51,7 @@ const I18N = {
     lblRain: "Rain Chance",
     lblVis: "Visibility",
     lblPm: "Air Particulate",
-    welcomePrefix: "Namaste! You're set up as",
+    welcomePrefix: "Namaste! You're in",
     welcomeSuffix: "I analyze live Air Quality (AQI), wind dynamics, UV, and humidity to give you sharp, practical, causal decisions — ask me anything!",
     decisionIntel: "Decision Intelligence",
     whyScience: "Causal Logic & Science (Kyun?):",
@@ -77,16 +84,20 @@ const I18N = {
     heroTitle: "मौसम जो आपकी भाषा में बात करे।",
     heroSub: "अपनी भूमिका चुनें — सटीक सलाह, कारण-तर्क (Causal Logic), AQI और अलर्ट आपके कार्य के अनुसार मिलेंगे।",
     farmerName: "किसान (Farmer)",
-    farmerDesc: "सिंचाई का समय, कीटनाशक छिड़काव सुरक्षा, बुवाई विंडो और फसल सुरक्षा",
+    farmerDesc: "कीटनाशक छिड़काव सीमा, सिंचाई समय, बुवाई विंडो और फसल रोग जोखिम",
+    btnLaunchFarmer: "किसान कंसोल खोलें",
     fishermanName: "मछुवारे / सागर मित्र (Fisherman)",
     fishermanDesc: "हवा की गति, लहरों की ऊंचाई, समुद्र की स्थिति और पानी में उतरने का निर्णय",
+    btnLaunchFisherman: "समुद्री कंसोल खोलें",
     generalName: "आम नागरिक / दैनिक जीवन (General)",
-    generalDesc: "वायु गुणवत्ता (AQI) स्वास्थ्य जोखिम, यात्रा सलाह, क्या पहनें और क्या साथ रखें",
+    generalDesc: "वायु गुणवत्ता (AQI) स्वास्थ्य जोखिम, UV सुरक्षा, बारिश का समय और क्या साथ रखें",
+    btnLaunchGeneral: "सामान्य कंसोल खोलें",
     detectingLoc: "स्थान खोजा जा रहा है…",
-    searchPlaceholder: "शहर या गाँव खोजें…",
+    searchPlaceholder: "शहर, जिला या गाँव खोजें…",
     feelsLikePrefix: "महसूस",
     chatPlaceholder: "कुछ भी पूछें (उदा. क्या आज कीटनाशक का छिड़काव करें? नाव निकालना सुरक्षित है?)",
-    pickRolePlaceholder: "तर्कसंगत AI मौसम सलाह शुरू करने के लिए बाईं ओर से अपनी भूमिका चुनें।",
+    lblHomeBack: "होम",
+    activeConsolePrefix: "सक्रिय कंसोल:",
     demoBtn: "डेमो मोड",
     monitorBtn: "लाइव मॉनिटर",
     lblWind: "हवा और झोंके",
@@ -95,7 +106,7 @@ const I18N = {
     lblRain: "बारिश की संभावना",
     lblVis: "दृश्यता (Visibility)",
     lblPm: "वायु कण (PM2.5)",
-    welcomePrefix: "नमस्ते! आप सेट हैं बतौर",
+    welcomePrefix: "नमस्ते! आप सक्रिय हैं",
     welcomeSuffix: "मैं लाइव वायु गुणवत्ता (AQI), हवा की गति, UV और आर्द्रता का विश्लेषण करके आपको ठोस और तार्किक निर्णय दूंगा — कुछ भी पूछें!",
     decisionIntel: "निर्णय बुद्धिमत्ता (Decision Intelligence)",
     whyScience: "कारण और वैज्ञानिक तर्क (क्यों?):",
@@ -124,20 +135,24 @@ const I18N = {
     logoutBtn: "लॉग आउट"
   },
   english: {
-    brandSubtitle: "Intelligence AI",
+    brandSubtitle: "AI Intelligence",
     heroTitle: "Weather that talks your language.",
-    heroSub: "Pick who you are — decisions, causal logic, AQI, and alerts are tuned specifically to your work.",
+    heroSub: "Pick your role — advice, causal logic, AQI, and alerts are framed specifically for your decisions.",
     farmerName: "Farmer",
-    farmerDesc: "Irrigation timing, spray drift safety, sowing windows & crop risks",
+    farmerDesc: "Spray drift limits, irrigation timing, sowing windows & crop disease risk",
+    btnLaunchFarmer: "Open Farmer Console",
     fishermanName: "Fisherman",
     fishermanDesc: "Wind gusts, swell height, sea roughness & go/no-go water safety",
+    btnLaunchFisherman: "Open Marine Console",
     generalName: "General Public",
-    generalDesc: "AQI health risks, travel advisories, what to wear & carry",
+    generalDesc: "AQI particulate risks, UV protection, rain windows & what to carry",
+    btnLaunchGeneral: "Open General Console",
     detectingLoc: "Detecting location…",
-    searchPlaceholder: "Search city or village…",
+    searchPlaceholder: "Search any city, district or village…",
     feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Should I spray pesticides today? Is it safe to sail?)",
-    pickRolePlaceholder: "Pick a role on the left to activate hyper-logical AI advisory.",
+    lblHomeBack: "Home",
+    activeConsolePrefix: "Active Console:",
     demoBtn: "Demo mode",
     monitorBtn: "Live monitor",
     lblWind: "Wind & Gusts",
@@ -146,7 +161,7 @@ const I18N = {
     lblRain: "Rain Chance",
     lblVis: "Visibility",
     lblPm: "Air Particulate",
-    welcomePrefix: "Welcome! You are set up as",
+    welcomePrefix: "Welcome to",
     welcomeSuffix: "I analyze live Air Quality (AQI), wind dynamics, UV, and humidity to give you sharp, practical, causal decisions — ask me anything!",
     decisionIntel: "Decision Intelligence",
     whyScience: "Causal Logic & Science (Why?):",
@@ -176,8 +191,71 @@ const I18N = {
   }
 };
 
+const SUGGESTIONS = {
+  farmer: {
+    hinglish: [
+      "🌾 Kya aaj pesticide spray kar sakte hain?",
+      "💧 Sinchai / Irrigation ka sahi time kab hai?",
+      "🌧️ Baarish kab tak aayegi aur kitni hogi?",
+      "🌱 Buvai / Sowing ke liye mausam theek hai?"
+    ],
+    hindi: [
+      "🌾 क्या आज कीटनाशक छिड़काव करना सुरक्षित है?",
+      "💧 सिंचाई करने का सही समय कब है?",
+      "🌧️ बारिश कब तक आ सकती है?",
+      "🌱 बुवाई के लिए मौसम की क्या स्थिति है?"
+    ],
+    english: [
+      "🌾 Is it safe to spray pesticides today?",
+      "💧 When is the optimal irrigation window?",
+      "🌧️ What is the rain precipitation forecast?",
+      "🌱 Is soil condition ready for sowing?"
+    ]
+  },
+  fisherman: {
+    hinglish: [
+      "🎣 Aaj boat nikalna safe hai ya nahi?",
+      "💨 Coastal wind gusts aur wave swell kitna hai?",
+      "⚠️ Squall aur rough sea warning status",
+      "🌙 Night fishing conditions check"
+    ],
+    hindi: [
+      "🎣 क्या आज समुद्र में नाव ले जाना सुरक्षित है?",
+      "💨 तटीय हवा और लहरों की स्थिति क्या है?",
+      "⚠️ तूफानी हवाओं (Squalls) की चेतावनी जांचें",
+      "🌙 रात में मछली पकड़ने के हालात"
+    ],
+    english: [
+      "🎣 Is it safe to take the boat out today?",
+      "💨 What are current wind gusts & swell heights?",
+      "⚠️ Any marine squall / storm warnings?",
+      "🌙 Night fishing sea condition forecast"
+    ]
+  },
+  general: {
+    hinglish: [
+      "🏃 Aaj outdoor morning/evening run safe hai?",
+      "😷 AQI particulate level aur mask guide",
+      "☀️ UV Index aur dhoop se safety guide",
+      "🌧️ Aaj bahar umbrella le jana padega?"
+    ],
+    hindi: [
+      "🏃 क्या आज बाहर दौड़ना या टहलना सुरक्षित है?",
+      "😷 वायु प्रदूषण (AQI) और मास्क सलाह",
+      "☀️ UV इंडेक्स और धूप से बचाव गाइड",
+      "🌧️ क्या आज छाता साथ रखना ज़रूरी है?"
+    ],
+    english: [
+      "🏃 Is outdoor running / workout safe today?",
+      "😷 What is the current AQI health risk?",
+      "☀️ UV index & sun exposure guidelines",
+      "🌧️ Will it rain today? Should I carry an umbrella?"
+    ]
+  }
+};
+
 /* =========================================================
-   INITIALIZE CACHED USER & STATE
+   INITIALIZE USER & STATE
    ========================================================= */
 let cachedUser = null;
 try {
@@ -202,9 +280,9 @@ const state = {
 };
 
 const ROLE_META = {
-  farmer:    { label: "Farmer",         icon: "&#127806;", accent: "#8FA35E", soft: "rgba(143,163,94,0.14)" },
-  fisherman: { label: "Fisherman",      icon: "&#127907;", accent: "#3E9DB8", soft: "rgba(62,157,184,0.14)" },
-  general:   { label: "General public", icon: "&#9728;&#65039;", accent: "#E8A33D", soft: "rgba(232,163,61,0.14)" }
+  farmer:    { label: "Farmer / Kisaan",         icon: "🌾", accent: "#8FA35E", soft: "rgba(143,163,94,0.18)" },
+  fisherman: { label: "Fisherman / Sagar Mitra", icon: "🎣", accent: "#3E9DB8", soft: "rgba(62,157,184,0.18)" },
+  general:   { label: "General Public",          icon: "☀️", accent: "#E8A33D", soft: "rgba(232,163,61,0.18)" }
 };
 
 const WEATHER_KEYWORDS = [
@@ -220,13 +298,106 @@ const WEATHER_KEYWORDS = [
    DOM ELEMENTS
    ========================================================= */
 const $ = (id) => document.getElementById(id);
-const roleScreen      = $("roleScreen");
-const chatScreen      = $("chatScreen");
-const statusPanel     = $("statusPanel");
-const chatPlaceholder  = $("chatPlaceholder");
-const messagesEl      = $("messages");
-const backToRoles     = $("backToRoles");
-const langSelect      = $("langSelect");
+const homeScreen     = $("homeScreen");
+const consoleScreen  = $("consoleScreen");
+const homeNavBtn     = $("homeNavBtn");
+const messagesEl     = $("messages");
+const langSelect     = $("langSelect");
+
+/* =========================================================
+   SPLASH SCREEN CONTROLLER
+   ========================================================= */
+function initSplashScreen() {
+  const splash = $("splashScreen");
+  const pBar = $("splashProgressBar");
+  const statusText = $("splashStatusText");
+  const logoImg = $("splashLogoImg");
+  const logoFallback = $("splashLogoFallback");
+
+  // Load custom logo if provided
+  if (CUSTOM_LOGO_URL && CUSTOM_LOGO_URL.trim()) {
+    logoImg.src = CUSTOM_LOGO_URL.trim();
+    logoImg.onload = () => {
+      logoImg.style.display = "block";
+      logoFallback.style.display = "none";
+    };
+  }
+
+  let progress = 10;
+  pBar.style.width = "15%";
+
+  const timer = setInterval(() => {
+    progress += Math.floor(Math.random() * 25) + 15;
+    if (progress >= 100) {
+      progress = 100;
+      pBar.style.width = "100%";
+      statusText.textContent = "Atmospheric Intelligence Ready ✓";
+      clearInterval(timer);
+      setTimeout(() => {
+        splash.classList.add("fade-out");
+      }, 500);
+    } else {
+      pBar.style.width = `${progress}%`;
+      if (progress > 50) statusText.textContent = "Analyzing real-time AQI & Wind telemetry…";
+    }
+  }, 140);
+}
+
+/* =========================================================
+   APP ROUTER (Home Screen vs Console Screen)
+   ========================================================= */
+function showHomeScreen() {
+  homeScreen.classList.add("active-screen");
+  consoleScreen.classList.remove("active-screen");
+  homeNavBtn.style.display = "none";
+  document.documentElement.style.setProperty("--accent", "#E8A33D");
+  document.documentElement.style.setProperty("--accent-soft", "rgba(232,163,61,0.15)");
+}
+
+function openConsoleScreen(role) {
+  state.role = role;
+  const m = ROLE_META[role];
+  document.documentElement.style.setProperty("--accent", m.accent);
+  document.documentElement.style.setProperty("--accent-soft", m.soft);
+
+  homeScreen.classList.remove("active-screen");
+  consoleScreen.classList.add("active-screen");
+  homeNavBtn.style.display = "flex";
+
+  const t = I18N[state.lang] || I18N.hinglish;
+  $("activePersonaLabel").textContent = `${t.activeConsolePrefix} ${m.label}`;
+
+  // Populate Suggestion Chips for this Persona
+  renderSuggestionChips(role);
+
+  // Send Initial Assistant Welcome if empty
+  if (messagesEl.children.length === 0) {
+    addAssistantText(`${t.welcomePrefix} **${m.label} Console**. ${t.welcomeSuffix}`);
+  }
+
+  if (!state.currentWeather) detectLocation();
+  if (state.user) persistUserPrefs();
+}
+
+homeNavBtn.addEventListener("click", showHomeScreen);
+
+document.querySelectorAll(".persona-card").forEach(card => {
+  card.addEventListener("click", () => openConsoleScreen(card.dataset.role));
+});
+
+function renderSuggestionChips(role) {
+  const container = $("suggestionChips");
+  if (!container) return;
+  const chips = (SUGGESTIONS[role] && SUGGESTIONS[role][state.lang]) || SUGGESTIONS[role]?.hinglish || [];
+  container.innerHTML = chips.map(text => `<button class="sugg-chip">${escapeHtml(text)}</button>`).join("");
+
+  container.querySelectorAll(".sugg-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      $("chatInput").value = chip.textContent;
+      sendMessage();
+    });
+  });
+}
 
 /* =========================================================
    LANGUAGE SWITCHING & COMPREHENSIVE LOCALIZATION
@@ -246,18 +417,21 @@ function applyLanguage(lang) {
 
   const t = I18N[lang];
   if ($("brandBadge")) $("brandBadge").textContent = t.brandSubtitle;
+  if ($("lblHomeBack")) $("lblHomeBack").textContent = t.lblHomeBack;
   if ($("heroTitle")) $("heroTitle").textContent = t.heroTitle;
   if ($("heroSub")) $("heroSub").textContent = t.heroSub;
   if ($("roleFarmerName")) $("roleFarmerName").textContent = t.farmerName;
   if ($("roleFarmerDesc")) $("roleFarmerDesc").textContent = t.farmerDesc;
+  if ($("btnLaunchFarmer")) $("btnLaunchFarmer").textContent = t.btnLaunchFarmer;
   if ($("roleFishermanName")) $("roleFishermanName").textContent = t.fishermanName;
   if ($("roleFishermanDesc")) $("roleFishermanDesc").textContent = t.fishermanDesc;
+  if ($("btnLaunchFisherman")) $("btnLaunchFisherman").textContent = t.btnLaunchFisherman;
   if ($("roleGeneralName")) $("roleGeneralName").textContent = t.generalName;
   if ($("roleGeneralDesc")) $("roleGeneralDesc").textContent = t.generalDesc;
+  if ($("btnLaunchGeneral")) $("btnLaunchGeneral").textContent = t.btnLaunchGeneral;
 
   if ($("cityInput")) $("cityInput").placeholder = t.searchPlaceholder;
   if ($("chatInput")) $("chatInput").placeholder = t.chatPlaceholder;
-  if ($("phText")) $("phText").textContent = t.pickRolePlaceholder;
 
   if ($("demoToggleText")) $("demoToggleText").textContent = t.demoBtn;
   if ($("monitorToggleText")) $("monitorToggleText").textContent = t.monitorBtn;
@@ -270,51 +444,13 @@ function applyLanguage(lang) {
   if ($("lblPm")) $("lblPm").textContent = t.lblPm;
   if ($("logoutBtn")) $("logoutBtn").textContent = t.logoutBtn;
 
+  if (state.role) {
+    $("activePersonaLabel").textContent = `${t.activeConsolePrefix} ${ROLE_META[state.role]?.label}`;
+    renderSuggestionChips(state.role);
+  }
+
   renderAuthMode();
 }
-
-// Initial language apply
-applyLanguage(state.lang);
-
-/* =========================================================
-   ROLE SELECTION
-   ========================================================= */
-document.querySelectorAll(".role-card").forEach(card => {
-  card.addEventListener("click", () => selectRole(card.dataset.role));
-});
-
-function applyRoleTheme(role) {
-  const m = ROLE_META[role];
-  if (!m) return;
-  document.documentElement.style.setProperty("--accent", m.accent);
-  document.documentElement.style.setProperty("--accent-soft", m.soft);
-}
-
-function selectRole(role) {
-  state.role = role;
-  applyRoleTheme(role);
-
-  roleScreen.style.display = "none";
-  statusPanel.classList.add("visible");
-  chatPlaceholder.style.display = "none";
-  chatScreen.classList.add("visible");
-  backToRoles.style.display = "flex";
-
-  const t = I18N[state.lang] || I18N.hinglish;
-  if (messagesEl.children.length === 0) {
-    addAssistantText(`${t.welcomePrefix} **${ROLE_META[role].label}**. ${t.welcomeSuffix}`);
-  }
-  if (!state.currentWeather) detectLocation();
-  if (state.user) persistUserPrefs();
-}
-
-backToRoles.addEventListener("click", () => {
-  roleScreen.style.display = "flex";
-  statusPanel.classList.remove("visible");
-  chatPlaceholder.style.display = "flex";
-  chatScreen.classList.remove("visible");
-  backToRoles.style.display = "none";
-});
 
 /* =========================================================
    GEOLOCATION, WEATHER & AIR QUALITY API
@@ -345,7 +481,7 @@ function detectLocation() {
 
 async function fetchWeatherByCity(city) {
   if (state.demoMode) return applyDemoWeather(city);
-  $("cityName").textContent = `Searching ${city}\u2026`;
+  $("cityName").textContent = `Searching ${city}…`;
   try {
     const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
     const geoData = await geoRes.json();
@@ -391,7 +527,7 @@ async function fetchAllWeatherData(lat, lon, cityName = null, country = null) {
 
     applyEnrichedWeather(forecastData, aqiData);
   } catch (e) {
-    console.error("Enriched weather fetch failed:", e);
+    console.error("Enriched weather fetch fallback:", e);
     fetchWeatherByCoordsFallback(lat, lon);
   }
 }
@@ -464,21 +600,21 @@ function applyEnrichedWeather(forecast, aqi) {
 
   // Update UI Elements
   $("cityName").textContent = state.city;
-  $("tempVal").textContent = `${temp}\u00b0`;
-  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}\u00b0`;
+  $("tempVal").textContent = `${temp}°`;
+  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}°`;
   $("condText").textContent = desc;
   $("windVal").textContent = `${windKmh} km/h ${windDir} (G: ${gustKmh})`;
   $("humVal").textContent = `${humidity}%`;
   $("uvVal").textContent = getUvCategory(uv);
   $("rainChanceVal").textContent = `${rainChance}%`;
   $("visVal").textContent = `${visibilityKm} km`;
-  $("pmVal").textContent = `PM2.5: ${pm25}\u00b5g`;
+  $("pmVal").textContent = `PM2.5: ${pm25}µg`;
 
   // AQI Badge
   const aqiInfo = getAqiCategory(usAqi);
   const aqiBadge = $("aqiBadge");
   aqiBadge.className = `aqi-badge ${aqiInfo.class}`;
-  $("aqiText").textContent = `AQI ${usAqi} \u00b7 ${aqiInfo.label}`;
+  $("aqiText").textContent = `AQI ${usAqi} · ${aqiInfo.label}`;
 
   // Store in State for AI Context
   state.currentWeather = {
@@ -499,11 +635,11 @@ function applyWeather(data) {
   const feelsLike = Math.round(data.main.feels_like || temp);
   const humidity = data.main.humidity;
   const windKmh = Math.round((data.wind.speed || 0) * 3.6);
-  const desc = data.weather && data.weather[0] ? data.weather[0].description : "\u2014";
+  const desc = data.weather && data.weather[0] ? data.weather[0].description : "—";
 
   $("cityName").textContent = state.city;
-  $("tempVal").textContent = `${temp}\u00b0`;
-  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}\u00b0`;
+  $("tempVal").textContent = `${temp}°`;
+  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}°`;
   $("condText").textContent = desc;
   $("windVal").textContent = `${windKmh} km/h`;
   $("humVal").textContent = `${humidity}%`;
@@ -538,20 +674,20 @@ function applyDemoWeather(city) {
   state.aqiData = demoAqi;
 
   $("cityName").textContent = demo.city;
-  $("tempVal").textContent = `${demo.temp}\u00b0`;
-  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${demo.feelsLike}\u00b0`;
+  $("tempVal").textContent = `${demo.temp}°`;
+  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${demo.feelsLike}°`;
   $("condText").textContent = demo.description;
   $("windVal").textContent = `${demo.windKmh} km/h ${demo.windDir} (G: ${demo.gustKmh})`;
   $("humVal").textContent = `${demo.humidity}%`;
   $("uvVal").textContent = getUvCategory(demo.uv);
   $("rainChanceVal").textContent = `${demo.rainChance}%`;
   $("visVal").textContent = `${demo.visibilityKm} km`;
-  $("pmVal").textContent = `PM2.5: ${demoAqi.pm25}\u00b5g`;
+  $("pmVal").textContent = `PM2.5: ${demoAqi.pm25}µg`;
 
   const aqiInfo = getAqiCategory(demoAqi.aqi);
   const aqiBadge = $("aqiBadge");
   aqiBadge.className = `aqi-badge ${aqiInfo.class}`;
-  $("aqiText").textContent = `AQI ${demoAqi.aqi} \u00b7 ${aqiInfo.label}`;
+  $("aqiText").textContent = `AQI ${demoAqi.aqi} · ${aqiInfo.label}`;
 
   drawSparkline(demo.temp);
 }
@@ -565,13 +701,13 @@ function drawSparkline(baseTemp) {
     pts.push(t);
   }
   const min = Math.min(...pts), max = Math.max(...pts);
-  const norm = pts.map(v => max === min ? 17 : 30 - ((v - min) / (max - min)) * 26);
-  const step = 90 / (pts.length - 1);
+  const norm = pts.map(v => max === min ? 19 : 34 - ((v - min) / (max - min)) * 30);
+  const step = 100 / (pts.length - 1);
   const d = norm.map((y, i) => `${i === 0 ? "M" : "L"} ${i * step} ${y}`).join(" ");
   const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
   svg.innerHTML = `
-    <path d="${d}" fill="none" stroke="${accent}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
-    <circle cx="${(pts.length - 1) * step}" cy="${norm[norm.length - 1]}" r="2.4" fill="${accent}"/>
+    <path d="${d}" fill="none" stroke="${accent}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="${(pts.length - 1) * step}" cy="${norm[norm.length - 1]}" r="3" fill="${accent}"/>
   `;
 }
 
@@ -602,7 +738,7 @@ function addUserText(text) {
 function addAssistantText(text) {
   const row = document.createElement("div");
   row.className = "msg-row assistant";
-  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div><div class="bubble">${formatMarkdown(text)}</div>`;
+  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "☀️"}</div><div class="bubble">${formatMarkdown(text)}</div>`;
   messagesEl.appendChild(row);
   scrollToBottom();
 }
@@ -623,7 +759,7 @@ function showReasoningTrace() {
     "Running domain causal logic model",
     "Structuring verdict & best window"
   ];
-  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div>
+  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "☀️"}</div>
     <div class="trace-card">
       ${steps.map((s, i) => `<div class="trace-step" data-i="${i}"><div class="tick"></div><span>${s}</span></div>`).join("")}
     </div>`;
@@ -637,7 +773,7 @@ function showReasoningTrace() {
     if (i > 0) {
       stepEls[i - 1].classList.remove("active");
       stepEls[i - 1].classList.add("done");
-      stepEls[i - 1].querySelector(".tick").textContent = "\u2713";
+      stepEls[i - 1].querySelector(".tick").textContent = "✓";
     }
     if (i < stepEls.length) { stepEls[i].classList.add("active"); i++; }
     else clearInterval(interval);
@@ -992,7 +1128,7 @@ function renderAssistantResult(result) {
     inner += `<div class="teaser-line" id="${teaserId}" onclick="handleTeaserClick('${teaserId}')">&#128274; <strong>${ROLE_META[state.role]?.label}</strong> ${t.loginUnlockedTeaser}</div>`;
   }
 
-  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div><div style="display:flex;flex-direction:column;max-width:84%;">${inner}</div>`;
+  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "☀️"}</div><div style="display:flex;flex-direction:column;max-width:84%;">${inner}</div>`;
   messagesEl.appendChild(row);
 
   if (teaserId) pendingTeasers.push({ id: teaserId, result });
@@ -1008,7 +1144,6 @@ function revealPendingTeasers() {
       el.outerHTML = adviceBlockHtml(result);
     }
   }
-  // Double check any remaining teaser line in DOM
   document.querySelectorAll(".teaser-line").forEach(el => {
     el.style.display = "none";
   });
@@ -1047,7 +1182,7 @@ function renderAlertCard(message, autoDetected) {
       <div class="alert-head">&#9888;&#65039; ${t.alertTitle}</div>
       <div>${escapeHtml(message)}</div>
       <div class="verify-row">
-        <span class="vcount">Loading confirmations\u2026</span>
+        <span class="vcount">Loading confirmations…</span>
         <div class="verify-actions"></div>
       </div>
     </div>`;
@@ -1064,7 +1199,7 @@ async function loadVerification(docKey, cardEl, category) {
   const localCountKey = "count_" + docKey;
 
   let count = parseInt(localStorage.getItem(localCountKey), 10);
-  if (isNaN(count)) count = 4; // realistic baseline
+  if (isNaN(count)) count = 4;
 
   try {
     const snap = await db.collection("confirmations").doc(docKey).get();
@@ -1072,9 +1207,7 @@ async function loadVerification(docKey, cardEl, category) {
       count = snap.data().count;
       localStorage.setItem(localCountKey, count);
     }
-  } catch (e) {
-    // Graceful offline fallback
-  }
+  } catch (e) {}
 
   const previousVote = localStorage.getItem(localVoteKey);
 
@@ -1109,7 +1242,6 @@ async function castVote(docKey, category, vote, countEl, actionsEl, currentCount
   const localVoteKey = "voted_" + docKey;
   const localCountKey = "count_" + docKey;
 
-  // Optimistic UI Update immediately!
   const newCount = vote === "yes" ? currentCount + 1 : currentCount;
   localStorage.setItem(localVoteKey, vote);
   localStorage.setItem(localCountKey, newCount);
@@ -1117,7 +1249,6 @@ async function castVote(docKey, category, vote, countEl, actionsEl, currentCount
   countEl.textContent = `${newCount} ${t.confirmedNearby} (${t.youConfirmed})`;
   actionsEl.innerHTML = `<span class="voted-badge">&#9989; ${vote === "yes" ? "Confirmed (Yes)" : "Dismissed (No)"}</span>`;
 
-  // Sync to Firestore in background without blocking UI
   try {
     const confirmRef = db.collection("confirmations").doc(docKey);
     const uid = state.user ? state.user.uid : ("guest_" + Math.random().toString(36).slice(2));
@@ -1135,7 +1266,7 @@ async function castVote(docKey, category, vote, countEl, actionsEl, currentCount
       tx.set(voteRef, { vote, votedAt: firebase.firestore.FieldValue.serverTimestamp() });
     });
   } catch (err) {
-    console.warn("Firestore vote sync handled gracefully:", err.message);
+    console.warn("Firestore vote sync error:", err.message);
   }
 }
 
@@ -1195,7 +1326,7 @@ async function checkForSevereConditions() {
         message = `High wind & gusts detected: ${w.windKmh} km/h (Gusts: ${w.gustKmh || 40} km/h) near ${state.city}.`;
       } else if (w.temp > 42) {
         severe = true; key = "heat_" + Math.round(w.temp / 2);
-        message = `Extreme heat wave: ${w.temp}\u00b0C (Feels like ${w.feelsLike}\u00b0C) near ${state.city}. Stay indoors.`;
+        message = `Extreme heat wave: ${w.temp}°C (Feels like ${w.feelsLike}°C) near ${state.city}. Stay indoors.`;
       } else if (aqi && aqi.aqi > 250) {
         severe = true; key = "aqi_" + Math.round(aqi.aqi / 20);
         message = `Severe Air Quality Spike: AQI ${aqi.aqi} (Hazardous PM2.5) near ${state.city}. High respiratory risk.`;
@@ -1287,7 +1418,6 @@ function handleLoginSuccess(userObj) {
   }));
   closeLoginModal();
   updateAuthUI();
-  // Instantly unlock all decision teasers & voting buttons without reload!
   revealPendingTeasers();
   refreshPendingVerifyCards();
   persistUserPrefs();
@@ -1331,7 +1461,7 @@ $("googleAuthBtn").addEventListener("click", async () => {
   }
 });
 
-// Instant Guest Auth (Zero barrier, instant unlock)
+// Instant Guest Auth
 if ($("guestAuthBtn")) {
   $("guestAuthBtn").addEventListener("click", () => {
     const guestUser = {
@@ -1351,7 +1481,6 @@ function humanizeAuthError(e) {
   return "Something went wrong. Please try again or use Instant Guest Access.";
 }
 
-// Firebase Auth State Listener
 auth.onAuthStateChanged(async (user) => {
   if (user) {
     state.user = user;
@@ -1383,7 +1512,7 @@ async function loadUserPrefs() {
     if (snap.exists) {
       const d = snap.data();
       if (d.lang && d.lang !== state.lang) applyLanguage(d.lang);
-      if (d.role && !state.role)          selectRole(d.role);
+      if (d.role && !state.role)          openConsoleScreen(d.role);
       if (d.city && !state.currentWeather) fetchWeatherByCity(d.city);
     }
   } catch (e) { console.error("loadUserPrefs error:", e); }
@@ -1392,5 +1521,8 @@ async function loadUserPrefs() {
 /* =========================================================
    INITIALIZATION
    ========================================================= */
+initSplashScreen();
+detectLocation();
 updateAuthUI();
-renderAuthMode();
+applyLanguage(state.lang);
+showHomeScreen();
