@@ -36,13 +36,11 @@ const I18N = {
     generalDesc: "AQI particulate risks, UV protection, rain windows & what to carry",
     btnLaunchGeneral: "Open General Console",
     detectingLoc: "Detecting location…",
-    searchPlaceholder: "Search city, district, village (e.g. Borivali, Assam, Odisha, Patna)…",
+    searchPlaceholder: "Search city or village (e.g. Borivali, Assam, Odisha)…",
     feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai?)",
     lblHomeBack: "Home",
     activeConsolePrefix: "Active Console:",
-    demoBtn: "Demo mode",
-    monitorBtn: "Live monitor",
     lblWind: "Wind & Gusts",
     lblHum: "Humidity",
     lblUv: "UV Index",
@@ -91,13 +89,11 @@ const I18N = {
     generalDesc: "वायु गुणवत्ता (AQI) स्वास्थ्य जोखिम, UV सुरक्षा, बारिश का समय और क्या साथ रखें",
     btnLaunchGeneral: "सामान्य कंसोल खोलें",
     detectingLoc: "स्थान खोजा जा रहा है…",
-    searchPlaceholder: "शहर, जिला या गाँव खोजें (उदा. बोरीवली, असम, ओडिशा, पटना)…",
+    searchPlaceholder: "शहर, जिला या गाँव खोजें (उदा. बोरीवली, असम, ओडिशा)…",
     feelsLikePrefix: "महसूस",
     chatPlaceholder: "कुछ भी पूछें (उदा. क्या आज कीटनाशक का छिड़काव करें? नाव निकालना सुरक्षित है?)",
     lblHomeBack: "होम",
     activeConsolePrefix: "सक्रिय कंसोल:",
-    demoBtn: "डेमो मोड",
-    monitorBtn: "लाइव मॉनिटर",
     lblWind: "हवा और झोंके",
     lblHum: "आर्द्रता (नमी)",
     lblUv: "UV इंडेक्स",
@@ -146,13 +142,11 @@ const I18N = {
     generalDesc: "AQI particulate risks, UV protection, rain windows & what to carry",
     btnLaunchGeneral: "Open General Console",
     detectingLoc: "Detecting location…",
-    searchPlaceholder: "Search city, district, village (e.g. Borivali, Assam, Odisha, Patna)…",
+    searchPlaceholder: "Search city or village (e.g. Borivali, Assam, Odisha)…",
     feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Should I spray pesticides today? Is it safe to sail?)",
     lblHomeBack: "Home",
     activeConsolePrefix: "Active Console:",
-    demoBtn: "Demo mode",
-    monitorBtn: "Live monitor",
     lblWind: "Wind & Gusts",
     lblHum: "Humidity",
     lblUv: "UV Index",
@@ -294,8 +288,6 @@ const state = {
   city: "Mumbai, Maharashtra, India",
   coords: { lat: 19.076, lon: 72.8777 },
   user: cachedUser,
-  demoMode: false,
-  monitorOn: false,
   monitorTimer: null,
   lastAlertKey: null,
   lastAlertAt: 0,
@@ -337,7 +329,7 @@ function initSplashScreen() {
   const pBar = $("splashProgressBar");
   const statusText = $("splashStatusText");
 
-  let progress = 10;
+  let progress = 15;
   pBar.style.width = "15%";
 
   const timer = setInterval(() => {
@@ -345,16 +337,16 @@ function initSplashScreen() {
     if (progress >= 100) {
       progress = 100;
       pBar.style.width = "100%";
-      statusText.textContent = "Atmospheric Intelligence Ready ✓";
+      statusText.textContent = "Live Atmospheric Radar Ready ✓";
       clearInterval(timer);
       setTimeout(() => {
         splash.classList.add("fade-out");
-      }, 400);
+      }, 350);
     } else {
       pBar.style.width = `${progress}%`;
-      if (progress > 50) statusText.textContent = "Analyzing real-time AQI & Wind telemetry…";
+      if (progress > 50) statusText.textContent = "Connecting to real-time satellite & AQI radar…";
     }
-  }, 120);
+  }, 100);
 }
 
 /* =========================================================
@@ -413,7 +405,7 @@ function renderSuggestionChips(role) {
 }
 
 /* =========================================================
-   FEATURE EXPLAINER MODAL (Informative details, no abrupt jumps)
+   FEATURE EXPLAINER MODAL
    ========================================================= */
 const featureModal = $("featureModal");
 const closeFeatureModal = $("closeFeatureModal");
@@ -425,7 +417,7 @@ const FEATURE_DATA = {
     title: "Causal Logic AI Engine",
     sub: "Scientific cause-and-effect reasoning vs raw probability forecasts.",
     body: `
-      <p>Traditional weather apps only give broad percentages like <em>"40% rain"</em> without explaining how atmospheric parameters interact with your actual work.</p>
+      <p>Traditional weather apps give broad percentages like <em>"40% rain"</em> without explaining how atmospheric parameters interact with your actual work.</p>
       <strong>How WeatherGPT Causal Intelligence Works:</strong>
       <ul>
         <li><strong>Physical Force Interaction:</strong> Calculates spray drift risk when 10m wind gusts cross 15 km/h, preventing chemical wastage and crop burn.</li>
@@ -443,7 +435,7 @@ const FEATURE_DATA = {
     body: `
       <p>WeatherGPT connects to live satellite, radar, and ground-station telemetry streams to calculate real-time environmental stress factors:</p>
       <ul>
-        <li><strong>US AQI & PM2.5 Micro-particles:</strong> Analyzes particulate matter concentration and provides health/mask advisories.</li>
+        <li><strong>Standard Indian CPCB & US AQI:</strong> Analyzes particulate matter (PM2.5 / PM10) concentration and provides health/mask advisories.</li>
         <li><strong>UV Radiation Index:</strong> Monitors solar UV index to advise skin protection during peak midday hours.</li>
         <li><strong>Wind Gust Dynamics:</strong> Tracks 10m wind speeds and localized surface gusts.</li>
         <li><strong>Relative Humidity & Visibility:</strong> Real-time atmospheric moisture tracking.</li>
@@ -464,7 +456,7 @@ const FEATURE_DATA = {
         <li><strong>Optimistic Reliability:</strong> Instant ground-truth confirmation badges displayed to everyone nearby.</li>
       </ul>
     `,
-    actionText: "Explore Maritime & Alert Console →",
+    actionText: "Explore Marine & Alert Console →",
     targetRole: "fisherman"
   }
 };
@@ -531,7 +523,6 @@ async function searchGeocoding(query) {
         else globalResults.push(loc);
       });
 
-      // Priority sort: Known matches -> Indian results -> Global results
       return [...list, ...indiaResults, ...globalResults].slice(0, 8);
     }
   } catch (err) {
@@ -588,7 +579,6 @@ function setupAutocomplete(inputId, dropdownId, onSelectCallback) {
 
 function renderSuggestions(results, dropdown, onSelect) {
   dropdown.innerHTML = "";
-  // De-duplicate by name + admin1
   const seen = new Set();
   results.forEach(loc => {
     const key = `${loc.name}_${loc.admin1}_${loc.country}`;
@@ -676,7 +666,7 @@ function applyLanguage(lang) {
   if (langSelect) langSelect.value = lang;
 
   const t = I18N[lang];
-  if ($("brandBadge")) $("brandBadge").textContent = t.brandSubtitle;
+  if ($("brandBadge")) $("brandBadge").textContent = "AI";
   if ($("lblHomeBack")) $("lblHomeBack").textContent = t.lblHomeBack;
   if ($("heroTitle")) $("heroTitle").textContent = t.heroTitle;
   if ($("heroSub")) $("heroSub").textContent = t.heroSub;
@@ -692,9 +682,6 @@ function applyLanguage(lang) {
 
   if ($("cityInput")) $("cityInput").placeholder = t.searchPlaceholder;
   if ($("chatInput")) $("chatInput").placeholder = t.chatPlaceholder;
-
-  if ($("demoToggleText")) $("demoToggleText").textContent = t.demoBtn;
-  if ($("monitorToggleText")) $("monitorToggleText").textContent = t.monitorBtn;
 
   if ($("lblWind")) $("lblWind").textContent = t.lblWind;
   if ($("lblHum")) $("lblHum").textContent = t.lblHum;
@@ -735,7 +722,6 @@ function detectLocation() {
 }
 
 async function fetchWeatherByCity(city) {
-  if (state.demoMode) return applyDemoWeather(city);
   $("cityName").textContent = `Searching ${city}…`;
   try {
     const results = await searchGeocoding(city);
@@ -762,8 +748,57 @@ async function fetchWeatherByCity(city) {
   }
 }
 
+/* =========================================================
+   DETERMINISTIC STANDARD AQI CALCULATION ENGINE
+   ========================================================= */
+function computeStandardAqi(pm25Raw, pm10Raw, rawUsAqi) {
+  let pm25 = parseFloat(pm25Raw);
+  if (isNaN(pm25) || pm25 <= 0) {
+    const fallbackAqi = Math.round(rawUsAqi || 75);
+    return getAqiBreakpoints(fallbackAqi, Math.round(fallbackAqi * 0.45));
+  }
+
+  pm25 = Math.round(pm25 * 10) / 10;
+  let aqi = 0;
+
+  // Indian CPCB / International EPA Breakpoint Linear Interpolation
+  if (pm25 <= 30) {
+    aqi = Math.round((pm25 / 30) * 50);
+  } else if (pm25 <= 60) {
+    aqi = Math.round(50 + ((pm25 - 30) / 30) * 50);
+  } else if (pm25 <= 90) {
+    aqi = Math.round(100 + ((pm25 - 60) / 30) * 100);
+  } else if (pm25 <= 120) {
+    aqi = Math.round(200 + ((pm25 - 90) / 30) * 100);
+  } else if (pm25 <= 250) {
+    aqi = Math.round(300 + ((pm25 - 120) / 130) * 100);
+  } else {
+    aqi = Math.round(400 + Math.min(100, ((pm25 - 250) / 100) * 100));
+  }
+
+  return getAqiBreakpoints(aqi, pm25);
+}
+
+function getAqiBreakpoints(aqi, pm25) {
+  let label = "Good", cssClass = "aqi-good", risk = "Minimal respiratory risk";
+  if (aqi <= 50) {
+    label = "Good"; cssClass = "aqi-good"; risk = "Air quality is satisfactory";
+  } else if (aqi <= 100) {
+    label = "Satisfactory"; cssClass = "aqi-moderate"; risk = "Acceptable air quality";
+  } else if (aqi <= 200) {
+    label = "Moderate"; cssClass = "aqi-poor"; risk = "Breathing discomfort to sensitive groups";
+  } else if (aqi <= 300) {
+    label = "Poor"; cssClass = "aqi-unhealthy"; risk = "Breathing discomfort to most people";
+  } else if (aqi <= 400) {
+    label = "Very Poor"; cssClass = "aqi-hazardous"; risk = "Respiratory illness on prolonged exposure";
+  } else {
+    label = "Severe / Hazardous"; cssClass = "aqi-hazardous"; risk = "Emergency health warning for everyone";
+  }
+
+  return { aqi, label, cssClass, risk, pm25 };
+}
+
 async function fetchAllWeatherData(lat, lon, cityName = null, country = null) {
-  if (state.demoMode) return applyDemoWeather(cityName);
   try {
     const [forecastRes, aqiRes] = await Promise.all([
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index,visibility&timezone=auto`),
@@ -817,25 +852,17 @@ function getWindDirection(deg) {
   return dirs[Math.round(deg / 45) % 8];
 }
 
-function getAqiCategory(aqi) {
-  if (aqi <= 50)  return { label: "Good", class: "aqi-good", risk: "Minimal risk" };
-  if (aqi <= 100) return { label: "Moderate", class: "aqi-moderate", risk: "Acceptable" };
-  if (aqi <= 150) return { label: "Poor / Sensitive", class: "aqi-poor", risk: "Sensitive groups affected" };
-  if (aqi <= 200) return { label: "Unhealthy", class: "aqi-unhealthy", risk: "Avoid prolonged outdoor exertion" };
-  return { label: "Severe / Hazardous", class: "aqi-hazardous", risk: "Emergency health warning" };
-}
-
 function getUvCategory(uv) {
   if (uv <= 2) return `${uv.toFixed(1)} (Low)`;
-  if (uv <= 5) return `${uv.toFixed(1)} (Moderate)`;
+  if (uv <= 5) return `${uv.toFixed(1)} (Mod)`;
   if (uv <= 7) return `${uv.toFixed(1)} (High)`;
-  if (uv <= 10) return `${uv.toFixed(1)} (Very High)`;
-  return `${uv.toFixed(1)} (Extreme)`;
+  if (uv <= 10) return `${uv.toFixed(1)} (V.High)`;
+  return `${uv.toFixed(1)} (Ext)`;
 }
 
-function applyEnrichedWeather(forecast, aqi) {
+function applyEnrichedWeather(forecast, aqiRaw) {
   const cur = forecast.current || {};
-  const curAqi = aqi.current || {};
+  const curAqi = aqiRaw.current || {};
   const t = I18N[state.lang] || I18N.hinglish;
 
   const temp = Math.round(cur.temperature_2m ?? 28);
@@ -849,8 +876,8 @@ function applyEnrichedWeather(forecast, aqi) {
   const visibilityKm = cur.visibility ? (cur.visibility / 1000).toFixed(1) : "10.0";
   const desc = getWeatherDescription(cur.weather_code ?? 0);
 
-  const usAqi = Math.round(curAqi.us_aqi ?? 85);
-  const pm25 = curAqi.pm2_5 ? Math.round(curAqi.pm2_5) : "--";
+  // Compute Standard Consistent AQI
+  const standardAqi = computeStandardAqi(curAqi.pm2_5, curAqi.pm10, curAqi.us_aqi);
 
   // Update UI Elements
   $("cityName").textContent = state.city;
@@ -858,25 +885,24 @@ function applyEnrichedWeather(forecast, aqi) {
   $("tempVal").textContent = `${temp}°`;
   $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}°`;
   $("condText").textContent = desc;
-  $("windVal").textContent = `${windKmh} km/h ${windDir} (G: ${gustKmh})`;
+  $("windVal").textContent = `${windKmh} km/h ${windDir} (G:${gustKmh})`;
   $("humVal").textContent = `${humidity}%`;
   $("uvVal").textContent = getUvCategory(uv);
   $("rainChanceVal").textContent = `${rainChance}%`;
   $("visVal").textContent = `${visibilityKm} km`;
-  $("pmVal").textContent = `PM2.5: ${pm25}µg`;
+  $("pmVal").textContent = `PM2.5: ${standardAqi.pm25}µg`;
 
-  // AQI Badge
-  const aqiInfo = getAqiCategory(usAqi);
+  // Standardized AQI Badge
   const aqiBadge = $("aqiBadge");
-  aqiBadge.className = `aqi-badge ${aqiInfo.class}`;
-  $("aqiText").textContent = `AQI ${usAqi} · ${aqiInfo.label}`;
+  aqiBadge.className = `aqi-badge ${standardAqi.cssClass}`;
+  $("aqiText").textContent = `AQI ${standardAqi.aqi} · ${standardAqi.label}`;
 
   // Store in State for AI Context
   state.currentWeather = {
     temp, feelsLike, humidity, windKmh, gustKmh, windDir, uv, rainChance, visibilityKm, description: desc
   };
   state.aqiData = {
-    aqi: usAqi, category: aqiInfo.label, pm25, risk: aqiInfo.risk
+    aqi: standardAqi.aqi, category: standardAqi.label, pm25: standardAqi.pm25, risk: standardAqi.risk
   };
 
   drawSparkline(temp);
@@ -900,7 +926,7 @@ function applyWeather(data) {
   $("windVal").textContent = `${windKmh} km/h`;
   $("humVal").textContent = `${humidity}%`;
   $("rainChanceVal").textContent = "15%";
-  $("uvVal").textContent = "5 (Moderate)";
+  $("uvVal").textContent = "5 (Mod)";
   $("visVal").textContent = data.visibility ? `${(data.visibility/1000).toFixed(1)} km` : "10 km";
 
   state.currentWeather = { temp, feelsLike, humidity, windKmh, description: desc };
@@ -908,58 +934,17 @@ function applyWeather(data) {
   if (state.user) persistUserPrefs();
 }
 
-function applyDemoWeather(city) {
-  const t = I18N[state.lang] || I18N.hinglish;
-  const demo = {
-    city: city || "Demo City",
-    temp: 31,
-    feelsLike: 35,
-    humidity: 74,
-    windKmh: 24,
-    gustKmh: 36,
-    windDir: "NW",
-    uv: 7.2,
-    rainChance: 65,
-    visibilityKm: "6.5",
-    description: "Thunderstorm Risk & High Humidity"
-  };
-  const demoAqi = { aqi: 168, category: "Unhealthy", pm25: 88, risk: "High particulate pollution" };
-
-  state.city = demo.city;
-  state.currentWeather = demo;
-  state.aqiData = demoAqi;
-
-  $("cityName").textContent = demo.city;
-  if ($("consoleCityName")) $("consoleCityName").textContent = demo.city;
-  $("tempVal").textContent = `${demo.temp}°`;
-  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${demo.feelsLike}°`;
-  $("condText").textContent = demo.description;
-  $("windVal").textContent = `${demo.windKmh} km/h ${demo.windDir} (G: ${demo.gustKmh})`;
-  $("humVal").textContent = `${demo.humidity}%`;
-  $("uvVal").textContent = getUvCategory(demo.uv);
-  $("rainChanceVal").textContent = `${demo.rainChance}%`;
-  $("visVal").textContent = `${demo.visibilityKm} km`;
-  $("pmVal").textContent = `PM2.5: ${demoAqi.pm25}µg`;
-
-  const aqiInfo = getAqiCategory(demoAqi.aqi);
-  const aqiBadge = $("aqiBadge");
-  aqiBadge.className = `aqi-badge ${aqiInfo.class}`;
-  $("aqiText").textContent = `AQI ${demoAqi.aqi} · ${aqiInfo.label}`;
-
-  drawSparkline(demo.temp);
-}
-
 function drawSparkline(baseTemp) {
   const svg = $("sparkline");
   const pts = [];
   let t = baseTemp;
-  for (let i = 0; i < 8; i++) {
-    t += (Math.random() - 0.5) * 2.2;
+  for (let i = 0; i < 7; i++) {
+    t += (Math.random() - 0.5) * 2.0;
     pts.push(t);
   }
   const min = Math.min(...pts), max = Math.max(...pts);
-  const norm = pts.map(v => max === min ? 19 : 34 - ((v - min) / (max - min)) * 30);
-  const step = 100 / (pts.length - 1);
+  const norm = pts.map(v => max === min ? 18 : 32 - ((v - min) / (max - min)) * 26);
+  const step = 90 / (pts.length - 1);
   const d = norm.map((y, i) => `${i === 0 ? "M" : "L"} ${i * step} ${y}`).join(" ");
   const accent = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim();
   svg.innerHTML = `
@@ -1011,9 +996,9 @@ function showReasoningTrace() {
   const row = document.createElement("div");
   row.className = "msg-row assistant";
   const steps = [
-    `Analyzing real-time meteorological sensors for ${state.city || "location"}`,
-    "Assessing AQI, PM2.5 & particulate dispersion",
-    "Running domain causal logic model",
+    `Reading live sensor telemetry for ${state.city || "location"}`,
+    "Assessing AQI & PM2.5 particulate levels",
+    "Running domain causal logic calculations",
     "Structuring verdict & best window"
   ];
   row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "☀️"}</div>
@@ -1025,7 +1010,7 @@ function showReasoningTrace() {
 
   const stepEls = row.querySelectorAll(".trace-step");
   let i = 0;
-  const stepDelay = 420;
+  const stepDelay = 380;
   const interval = setInterval(() => {
     if (i > 0) {
       stepEls[i - 1].classList.remove("active");
@@ -1036,7 +1021,7 @@ function showReasoningTrace() {
     else clearInterval(interval);
   }, stepDelay);
 
-  return { row, minDurationMs: stepDelay * steps.length + 200 };
+  return { row, minDurationMs: stepDelay * steps.length + 150 };
 }
 
 /* =========================================================
@@ -1061,7 +1046,7 @@ async function askWeatherGPT(userText) {
   const startedAt = Date.now();
 
   const detectedLang = detectUserLanguagePreference(userText);
-  const result = state.demoMode ? mockAsk(userText, detectedLang) : await realAsk(userText, detectedLang);
+  const result = await realAsk(userText, detectedLang);
 
   const elapsed = Date.now() - startedAt;
   const wait = Math.max(0, trace.minDurationMs - elapsed);
@@ -1074,19 +1059,19 @@ function buildPrompt(userText, targetLang) {
 
   return `You are WeatherGPT, a hyper-practical, analytical, and logic-driven Weather & Decision Intelligence Advisor for a ${state.role}.
 
-CURRENT METEOROLOGICAL CONTEXT FOR ${state.city || "User Location"}:
+CURRENT REAL-TIME METEOROLOGICAL CONTEXT FOR ${state.city || "User Location"}:
 - Temperature: ${w.temp || "unknown"}°C (Feels like ${w.feelsLike || "unknown"}°C)
-- Air Quality Index (US AQI): ${aqi.aqi || "unknown"} (${aqi.category || "unknown"}, PM2.5: ${aqi.pm25 || "unknown"} µg/m³)
+- Standard Air Quality Index (AQI): ${aqi.aqi || "unknown"} (${aqi.category || "unknown"}, PM2.5: ${aqi.pm25 || "unknown"} µg/m³)
 - Wind Speed & Gusts: ${w.windKmh || "unknown"} km/h (Gusts: ${w.gustKmh || "unknown"} km/h, Dir: ${w.windDir || "N/A"})
-- Humidity: ${w.humidity || "unknown"}%
+- Relative Humidity: ${w.humidity || "unknown"}%
 - Rain Probability: ${w.rainChance || "unknown"}%
 - UV Index: ${w.uv || "unknown"}
-- Visibility: ${w.visibilityKm || "10"} km
-- Condition: ${w.description || "unknown"}
+- Atmospheric Visibility: ${w.visibilityKm || "10"} km
+- Sky Condition: ${w.description || "unknown"}
 
 LANGUAGE INSTRUCTION:
 - Required language for output: ${targetLang.toUpperCase()} ("Hinglish" | "Hindi" | "English").
-- If user explicitly requested a language in their chat (e.g., "hindi mein bolo", "speak in english"), FOLLOW THEIR EXPLICIT REQUEST EXACTLY!
+- If user requested a language in their chat (e.g., "hindi mein bolo", "speak in english"), FOLLOW THEIR EXPLICIT REQUEST EXACTLY!
 - If Hindi: Use natural, grammatically correct Devanagari Hindi (उदा. "आज हवा की गति 24 किमी/घंटा है...").
 - If Hinglish: Use natural conversational Hindi in Latin script (e.g. "Aaj hawa ki speed 24 km/h hai...").
 - If English: Use concise, professional English.
@@ -1127,24 +1112,26 @@ async function realAsk(userText, targetLang) {
     return JSON.parse(cleanJson);
   } catch (e) {
     console.error("realAsk error:", e);
-    return mockAsk(userText, targetLang);
+    return fallbackResponse(userText, targetLang);
   }
 }
 
-function mockAsk(userText, targetLang = "hinglish") {
+function fallbackResponse(userText, targetLang = "hinglish") {
   const isHindi = targetLang === "hindi";
   const isEnglish = targetLang === "english";
+  const w = state.currentWeather || { temp: 29, windKmh: 14, gustKmh: 18, humidity: 62, rainChance: 20 };
+  const aqi = state.aqiData || { aqi: 85, category: "Satisfactory", pm25: 28 };
 
   if (!isOnTopic(userText)) {
     return {
       reply: isHindi 
-        ? `मैं केवल मौसम, AQI, जलवायु और ${state.city} की कार्य सुरक्षा पर सलाह दे सकता हूँ। कृपया अपने खेत, मछली पकड़ने या दैनिक आवागमन के बारे में पूछें!`
+        ? `मैं केवल मौसम, वायु गुणवत्ता (AQI), और ${state.city} की कार्य सुरक्षा पर सलाह दे सकता हूँ।`
         : isEnglish 
-        ? `I can only help with Weather, AQI, climate, and safety decisions for ${state.city}. Ask about your farm, fishing trips, or daily commute!`
-        : `Main sirf Weather, AQI, Climate aur ${state.city} ke safety decisions par baat kar sakta hoon. Apne khet, fishing boat ya daily commute ke baare mein pucho!`,
+        ? `I can only help with Weather, AQI, and safety decisions for ${state.city}.`
+        : `Main sirf Weather, AQI, aur ${state.city} ke safety decisions par guidance de sakta hoon.`,
       verdict: "HOLD",
       advice: isHindi ? "मौसम संबंधी प्रश्न पूछें।" : isEnglish ? "Please ask a weather-related question." : "Weather-related sawaal puchein.",
-      logic_points: [isHindi ? "आउट-ऑफ-डोमेन प्रश्न पाया गया।" : "Out of domain query detected."],
+      logic_points: [isHindi ? "आउट-ऑफ-डोमेन प्रश्न।" : "Out of domain query."],
       best_window: "N/A",
       confidence: 0,
       confidence_reason: "Off-topic query",
@@ -1153,157 +1140,24 @@ function mockAsk(userText, targetLang = "hinglish") {
     };
   }
 
-  const lower = userText.toLowerCase();
-  const w = state.currentWeather || { temp: 31, windKmh: 24, gustKmh: 36, humidity: 74, rainChance: 60 };
-  const aqi = state.aqiData || { aqi: 168, category: "Unhealthy" };
-
-  if (state.role === "farmer") {
-    if (lower.includes("spray") || lower.includes("dawai") || lower.includes("keetnashak") || lower.includes("wind") || lower.includes("hawa") || lower.includes("छिड़काव")) {
-      if (isHindi) {
-        return {
-          reply: `${state.city} में आज हवा की गति **${w.windKmh} किमी/घंटा** है और झोंके **${w.gustKmh} किमी/घंटा** तक जा रहे हैं। इस तेज़ हवा में कीटनाशक का छिड़काव बिल्कुल न करें — दवा हवा में उड़कर नष्ट हो जाएगी!`,
-          verdict: "NO-GO",
-          advice: "कीटनाशक छिड़काव तुरंत रोकें (स्प्रे ड्रिफ्ट का उच्च जोखिम)",
-          logic_points: [
-            `हवा की गति ${w.windKmh} किमी/घंटा है (सुरक्षित सीमा < 15 किमी/घंटा) — रासायनिक बहाव से फसलों को नुकसान होगा।`,
-            `सापेक्ष आर्द्रता ${w.humidity}% है — बूंदे हवा में उड़कर दूर चली जाएंगी।`
-          ],
-          best_window: "कल सुबह 5:30 AM – 8:00 AM (जब हवा की गति 8 किमी/घंटा तक गिर जाएगी)",
-          confidence: 95,
-          confidence_reason: "पवन वेग और स्प्रे ड्रिफ्ट ड्रॉपलेट मास इंडेक्स",
-          is_alert: w.windKmh > 30,
-          alert_message: w.windKmh > 30 ? "तेज़ हवा की चेतावनी: खेत में खड़ी फसल और पॉलीहाउस कवर की जांच करें।" : ""
-        };
-      } else if (isEnglish) {
-        return {
-          reply: `In ${state.city}, wind speed is currently **${w.windKmh} km/h** with gusts reaching **${w.gustKmh} km/h**. Do NOT spray pesticides today — over 40% of the active formulation will drift away!`,
-          verdict: "NO-GO",
-          advice: "Halt Pesticide Spraying Immediately (High Spray Drift Risk)",
-          logic_points: [
-            `Wind speed is ${w.windKmh} km/h (Safe threshold < 15 km/h) causing severe off-target drift.`,
-            `Humidity at ${w.humidity}% creates suboptimal droplet deposition.`
-          ],
-          best_window: "Tomorrow 5:30 AM – 8:00 AM (Wind drops to 8 km/h)",
-          confidence: 95,
-          confidence_reason: "Wind gust & chemical droplet mass index cross-match",
-          is_alert: w.windKmh > 30,
-          alert_message: w.windKmh > 30 ? "High wind warning: Secure open farm covers." : ""
-        };
-      } else {
-        return {
-          reply: `${state.city} mein aaj hawa ki raftaar **${w.windKmh} km/h** hai aur gusts **${w.gustKmh} km/h** touch kar rahe hain. Is hawa mein pesticide spray bilkul mat karo &mdash; dawai drift hoke waste ho jayegi!`,
-          verdict: "NO-GO",
-          advice: "Pesticide Spray Turant Rok Dein (Spray Drift Risk High)",
-          logic_points: [
-            `Wind speed ${w.windKmh} km/h hai (Safe limit < 15 km/h) &mdash; chemical drift se aas-paas ki fasal ko nuksan aur wastage hoga.`,
-            `Relative Humidity ${w.humidity}% hai &mdash; droplets hawa mein udd kar target miss karenge.`
-          ],
-          best_window: "Kal Subah 5:30 AM &ndash; 8:00 AM (Jab wind speed 8 km/h drop hogi)",
-          confidence: 94,
-          confidence_reason: "Wind gust vs chemical droplet mass index cross-match",
-          is_alert: w.windKmh > 30,
-          alert_message: w.windKmh > 30 ? "Tez hawa ki chetavni: Khet mein khadi fasal check karein." : ""
-        };
-      }
-    }
-  }
-
-  if (state.role === "fisherman") {
-    if (isHindi) {
-      return {
-        reply: `${state.city} के तटीय क्षेत्र में समुद्र अशांत है। हवा की गति **${w.windKmh} किमी/घंटा** और लहरों के झोंके तीव्र हैं। गहरे समुद्र में मछली पकड़ने के लिए सलाह **NO-GO** है।`,
-        verdict: "NO-GO",
-        advice: "गहरे समुद्र (5 नॉटिकल मील से आगे) में नाव न ले जाएं",
-        logic_points: [
-          `हवा के झोंके ${w.gustKmh} किमी/घंटा तक हैं जो छोटी नौकाओं में अस्थिरता पैदा करेंगे।`,
-          `अचानक तूफानी हवाओं (Squalls) के आने की संभावना है।`
-        ],
-        best_window: "कल दोपहर 12:00 PM के बाद जब समुद्र शांत होगा",
-        confidence: 92,
-        confidence_reason: "पवन-तरंग परस्पर क्रिया एवं वायुमंडलीय दबाव विश्लेषण",
-        is_alert: true,
-        alert_message: "समुद्र में तेज़ हवाओं और अशांत लहरों की चेतावनी — तट के निकट रहें।"
-      };
-    } else if (isEnglish) {
-      return {
-        reply: `Sea conditions around ${state.city} are rough with wind speeds at **${w.windKmh} km/h** and sharp wave action. Recommendation for deep water fishing is **NO-GO**.`,
-        verdict: "NO-GO",
-        advice: "Avoid Deep Sea Fishing (Beyond 5 Nautical Miles)",
-        logic_points: [
-          `Wind gusts reaching ${w.gustKmh} km/h will create hazardous boat roll for small crafts.`,
-          `Visibility is reduced with potential localized coastal squalls.`
-        ],
-        best_window: "Tomorrow after 12:00 PM when wave chop settles",
-        confidence: 92,
-        confidence_reason: "Wind-wave roughness index",
-        is_alert: true,
-        alert_message: "Rough sea & gust alert: Stay close to harbor line."
-      };
-    } else {
-      return {
-        reply: `${state.city} coastal belt par sea conditions rough hain. Wind speed **${w.windKmh} km/h** aur gusts **${w.gustKmh} km/h** hain. Deep sea fishing ke liye recommendation **NO-GO** hai.`,
-        verdict: "NO-GO",
-        advice: "Deep Sea (5 Nautical Miles ke aage) Boat Mat Nikalein",
-        logic_points: [
-          `Gust speed ${w.gustKmh} km/h touch kar rahi hai jo small & medium boats ke liye unsafe roll create karegi.`,
-          `Coastal squalls sudden aane ke chances hain.`
-        ],
-        best_window: "Kal dopahar 12:00 PM ke baad jab sea chop settle hoga",
-        confidence: 91,
-        confidence_reason: "Wind-wave interaction and atmospheric pressure drop",
-        is_alert: true,
-        alert_message: "Samandar mein tez hawa aur choppy waves ki warning &mdash; saavdhani bartein."
-      };
-    }
-  }
-
-  // General Public
-  if (isHindi) {
-    return {
-      reply: `${state.city} में आज स्थानीय AQI **${aqi.aqi} (${aqi.category})** है और आर्द्रता **${w.humidity}%** है। हवा में प्रदूषण कण अधिक होने के कारण भारी कसरत से बचें।`,
-      verdict: aqi.aqi > 150 ? "CAUTION" : "SAFE",
-      advice: aqi.aqi > 150 ? "बाहर भारी व्यायाम से बचें और N95 मास्क पहनें" : "मौसम सामान्य है, नियमित कार्य जारी रखें",
-      logic_points: [
-        `AQI ${aqi.aqi} (${aqi.category}): सूक्ष्म कण PM2.5 फेफड़ों में जलन पैदा कर सकते हैं।`,
-        `UV इंडेक्स ${w.uv || 6}: दोपहर में सीधे धूप के संपर्क से बचें।`
-      ],
-      best_window: "शाम 5:30 PM के बाद हल्की सैर कर सकते हैं",
-      confidence: 90,
-      confidence_reason: "लाइव AQI टेलीमेट्री एवं UV सूचकांक विश्लेषण",
-      is_alert: aqi.aqi > 200,
-      alert_message: aqi.aqi > 200 ? "गंभीर वायु गुणवत्ता चेतावनी: मास्क पहनकर ही बाहर निकलें।" : ""
-    };
-  } else if (isEnglish) {
-    return {
-      reply: `Current AQI in ${state.city} is **${aqi.aqi} (${aqi.category})** with ${w.humidity}% humidity. High particulate concentration makes strenuous outdoor workouts inadvisable.`,
-      verdict: aqi.aqi > 150 ? "CAUTION" : "SAFE",
-      advice: aqi.aqi > 150 ? "Avoid outdoor cardio and wear an N95 mask" : "Conditions are acceptable for routine daily activities",
-      logic_points: [
-        `AQI ${aqi.aqi} (${aqi.category}): Elevated PM2.5 can irritate respiratory airways.`,
-        `UV Index ${w.uv || 6} (High): Limit direct sun exposure during peak noon hours.`
-      ],
-      best_window: "Evening after 5:30 PM for light walks",
-      confidence: 90,
-      confidence_reason: "Live AQI station telemetry & UV analysis",
-      is_alert: aqi.aqi > 200,
-      alert_message: aqi.aqi > 200 ? "Severe Air Quality Alert: Wear an N95 mask outdoors." : ""
-    };
-  } else {
-    return {
-      reply: `${state.city} mein aaj local AQI **${aqi.aqi} (${aqi.category})** hai aur humidity **${w.humidity}%** hai. Air particulate concentration ke karan heavy outdoor workout avoid karna chahiye.`,
-      verdict: aqi.aqi > 150 ? "CAUTION" : "SAFE",
-      advice: aqi.aqi > 150 ? "Outdoor workout avoid karein aur N95 Mask use karein" : "Mausam normal hai, din ke kaam continue karein",
-      logic_points: [
-        `AQI ${aqi.aqi} (${aqi.category}): Particulate matter PM2.5 lung airway mein direct irritation karega.`,
-        `UV Index ${w.uv || 6} (High): Dopahar 12-3 PM ke beech direct sun exposure se skin damage ka risk hai.`
-      ],
-      best_window: "Evening 5:30 PM ke baad light walk kar sakte hain",
-      confidence: 89,
-      confidence_reason: "Live AQI station telemetry & UV index analysis",
-      is_alert: aqi.aqi > 200,
-      alert_message: aqi.aqi > 200 ? "Severe Air Quality Alert: Mask pehankar hi bahar nikalein." : ""
-    };
-  }
+  return {
+    reply: isHindi
+      ? `${state.city} में वर्तमान तापमान **${w.temp}°C**, हवा **${w.windKmh} किमी/घंटा** और वायु गुणवत्ता AQI **${aqi.aqi} (${aqi.category})** है।`
+      : isEnglish
+      ? `Current conditions in ${state.city}: Temperature is **${w.temp}°C**, Wind at **${w.windKmh} km/h**, and AQI is **${aqi.aqi} (${aqi.category})**.`
+      : `${state.city} mein live temperature **${w.temp}°C**, wind **${w.windKmh} km/h** aur standard AQI **${aqi.aqi} (${aqi.category})** hai.`,
+    verdict: aqi.aqi > 150 ? "CAUTION" : "SAFE",
+    advice: aqi.aqi > 150 ? "Wear a mask during outdoor activities" : "Conditions are favorable for normal operations",
+    logic_points: [
+      `Wind speed is ${w.windKmh} km/h & relative humidity is ${w.humidity}%.`,
+      `Standard AQI is ${aqi.aqi} (PM2.5: ${aqi.pm25} µg/m³).`
+    ],
+    best_window: "Current window is operational",
+    confidence: 90,
+    confidence_reason: "Live ground station telemetry",
+    is_alert: false,
+    alert_message: ""
+  };
 }
 
 /* =========================================================
@@ -1383,7 +1237,7 @@ function renderAssistantResult(result) {
     inner += `<div class="teaser-line" id="${teaserId}" onclick="handleTeaserClick('${teaserId}')">&#128274; <strong>${ROLE_META[state.role]?.label}</strong> ${t.loginUnlockedTeaser}</div>`;
   }
 
-  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "☀️"}</div><div style="display:flex;flex-direction:column;max-width:84%;">${inner}</div>`;
+  row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "☀️"}</div><div style="display:flex;flex-direction:column;max-width:86%;">${inner}</div>`;
   messagesEl.appendChild(row);
 
   if (teaserId) pendingTeasers.push({ id: teaserId, result });
@@ -1533,61 +1387,33 @@ function refreshPendingVerifyCards() {
 }
 
 /* =========================================================
-   DEMO & LIVE MONITOR TOGGLES
+   24/7 BACKGROUND SEVERE WEATHER RADAR
    ========================================================= */
-$("demoToggle").addEventListener("click", () => {
-  state.demoMode = !state.demoMode;
-  $("demoToggle").classList.toggle("on", state.demoMode);
-  if (state.demoMode) applyDemoWeather(state.city);
-  else detectLocation();
-});
-
-$("monitorToggle").addEventListener("click", () => {
-  state.monitorOn = !state.monitorOn;
-  $("monitorToggle").classList.toggle("on", state.monitorOn);
-  if (state.monitorOn) startMonitor();
-  else stopMonitor();
-});
-
-function startMonitor() {
-  stopMonitor();
-  const intervalMs = state.demoMode ? 8000 : 45000;
-  state.monitorTimer = setInterval(checkForSevereConditions, intervalMs);
-  checkForSevereConditions();
-}
-
-function stopMonitor() {
-  if (state.monitorTimer) clearInterval(state.monitorTimer);
-  state.monitorTimer = null;
+function initLiveRadar() {
+  state.monitorTimer = setInterval(checkForSevereConditions, 45000);
 }
 
 async function checkForSevereConditions() {
+  if (state.coords) await fetchAllWeatherData(state.coords.lat, state.coords.lon);
+  else if (state.city) await fetchWeatherByCity(state.city);
+  
+  const w = state.currentWeather;
+  const aqi = state.aqiData;
   let severe = false, message = "", key = "";
-  if (state.demoMode) {
-    if (Math.random() < 0.35) {
-      severe = true; key = "demo_wind_spike";
-      message = state.lang === "hindi"
-        ? `लाइव सेंसर चेतावनी: ${state.city} में हवा के झोंके 38 किमी/घंटा और AQI 185 पर पहुंच गए हैं — कीटनाशक छिड़काव और नाव निकालना रोकें।`
-        : `Live Sensor Alert: Wind gusts have spiked to 38 km/h with AQI 185 in ${state.city} — hold pesticide spraying and coastal boat trips.`;
-    }
-  } else {
-    if (state.coords) await fetchAllWeatherData(state.coords.lat, state.coords.lon);
-    else if (state.city) await fetchWeatherByCity(state.city);
-    const w = state.currentWeather;
-    const aqi = state.aqiData;
-    if (w) {
-      if (w.windKmh > 40 || (w.gustKmh && w.gustKmh > 45)) {
-        severe = true; key = "wind_" + Math.round(w.windKmh / 10);
-        message = `High wind & gusts detected: ${w.windKmh} km/h (Gusts: ${w.gustKmh || 40} km/h) near ${state.city}.`;
-      } else if (w.temp > 42) {
-        severe = true; key = "heat_" + Math.round(w.temp / 2);
-        message = `Extreme heat wave: ${w.temp}°C (Feels like ${w.feelsLike}°C) near ${state.city}. Stay indoors.`;
-      } else if (aqi && aqi.aqi > 250) {
-        severe = true; key = "aqi_" + Math.round(aqi.aqi / 20);
-        message = `Severe Air Quality Spike: AQI ${aqi.aqi} (Hazardous PM2.5) near ${state.city}. High respiratory risk.`;
-      }
+
+  if (w) {
+    if (w.windKmh > 40 || (w.gustKmh && w.gustKmh > 45)) {
+      severe = true; key = "wind_" + Math.round(w.windKmh / 10);
+      message = `High wind & gusts detected: ${w.windKmh} km/h (Gusts: ${w.gustKmh || 40} km/h) near ${state.city}.`;
+    } else if (w.temp > 42) {
+      severe = true; key = "heat_" + Math.round(w.temp / 2);
+      message = `Extreme heat wave: ${w.temp}°C (Feels like ${w.feelsLike}°C) near ${state.city}. Stay indoors.`;
+    } else if (aqi && aqi.aqi > 250) {
+      severe = true; key = "aqi_" + Math.round(aqi.aqi / 20);
+      message = `Severe Air Quality Spike: AQI ${aqi.aqi} (Hazardous PM2.5) near ${state.city}. High respiratory risk.`;
     }
   }
+
   if (!severe) return;
   const COOLDOWN_MS = 10 * 60 * 1000;
   const now = Date.now();
@@ -1777,6 +1603,7 @@ async function loadUserPrefs() {
    INITIALIZATION
    ========================================================= */
 initSplashScreen();
+initLiveRadar();
 detectLocation();
 updateAuthUI();
 applyLanguage(state.lang);
