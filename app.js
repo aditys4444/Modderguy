@@ -1072,7 +1072,7 @@ function showReasoningTrace() {
 }
 
 /* =========================================================
-   HYPER-LOGICAL AI QUERY & LANGUAGE DETECTION
+   HYPER-LOGICAL AI QUERY & ULTRA-FAST RESPONSE ENGINE
    ========================================================= */
 function detectUserLanguagePreference(userText) {
   const lower = userText.toLowerCase();
@@ -1092,11 +1092,23 @@ async function askWeatherGPT(userText) {
   const trace = showReasoningTrace();
   const detectedLang = detectUserLanguagePreference(userText);
 
+  // Rapid 3.5s timeout promise so user never experiences long lag
+  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3500));
+
   try {
-    const result = await realAsk(userText, detectedLang);
+    const result = await Promise.race([
+      realAsk(userText, detectedLang),
+      timeoutPromise
+    ]);
+
     clearInterval(trace.interval);
     trace.row.remove();
-    renderAssistantResult(result);
+
+    if (result && result.reply) {
+      renderAssistantResult(result);
+    } else {
+      renderAssistantResult(fallbackResponse(userText, detectedLang));
+    }
   } catch (err) {
     clearInterval(trace.interval);
     trace.row.remove();
@@ -1108,61 +1120,48 @@ function buildPrompt(userText, targetLang) {
   const w = state.currentWeather || {};
   const aqi = state.aqiData || {};
 
-  return `You are WeatherGPT, a sharp, hyper-sensible, analytical, and logic-driven atmospheric intelligence advisor for a ${state.role} in ${state.city}.
-
-CURRENT REAL-TIME ATMOSPHERIC TELEMETRY FOR ${state.city || "User Location"}:
-- Temperature: ${w.temp || "28"}°C (Feels like ${w.feelsLike || "29"}°C)
-- Standard Air Quality Index (AQI): ${aqi.aqi || "85"} (${aqi.category || "Satisfactory"}, PM2.5: ${aqi.pm25 || "28"} µg/m³)
-- Wind Velocity & Gusts: ${w.windKmh || "14"} km/h (Gusts: ${w.gustKmh || "18"} km/h, Dir: ${w.windDir || "N/A"})
-- Relative Humidity: ${w.humidity || "60"}%
-- Rain Probability: ${w.rainChance || "15"}%
-- UV Radiation Index: ${w.uv || "5.0"}
-- Atmospheric Visibility: ${w.visibilityKm || "10.0"} km
-- Sky Condition: ${w.description || "Clear Sky"}
-
-LANGUAGE RULES:
-- Output language: ${targetLang.toUpperCase()} ("Hinglish" | "Hindi" | "English").
-- If Hindi: Natural, grammatically crisp Devanagari Hindi (उदा. "${state.city} में आज हवा की गति ${w.windKmh} किमी/घंटा है...").
-- If Hinglish: Natural conversational Hindi in Roman script (e.g., "${state.city} mein live wind speed ${w.windKmh} km/h hai...").
-- If English: Sharp, professional, direct English.
-
-CORE INTELLIGENCE & SENSIBLE REASONING RULES:
-1. Ground every answer in the REAL atmospheric telemetry numbers above for ${state.city}.
-2. HANDLING TRICKY, CASUAL, SLANG, TEST & WEIRD QUERIES:
-   - If user asks casual/slang/sarcastic/unusual questions (e.g. "aaj bahar ghumne jau ya so jau", "cricket khel sakte hain kya", "flight delay hogi kya", "swimming jau kya", "party karni hai", "pakode talu kya"):
-   - DO NOT refuse or say out of domain. INSTEAD, give a SMART, WITTY, LOGICAL answer evaluating their plan against the current rain chance (${w.rainChance}%), temperature (${w.temp}°C), wind gusts (${w.gustKmh} km/h), UV index (${w.uv}) and AQI (${aqi.aqi})!
-3. DOMAIN DECISIONS:
-   - Farmer: Spray drift threshold (>15 km/h wind), fungal risk (>75% humidity), optimal irrigation/sowing windows.
-   - Fisherman: Coastal gusts vs swell roughness, deep-sea water threshold.
-   - General: AQI particulate health risk, UV noon protection, rain gear necessities.
-4. Provide a direct VERDICT: "SAFE" | "CAUTION" | "NO-GO" | "HOLD".
-5. Provide specific "logic_points" (2 concise bullet points explaining WHY with real numbers) and a "best_window" (timeframe when conditions are best).
-6. Response format: STRICT JSON ONLY (no markdown fences around JSON):
+  return `You are WeatherGPT for ${state.role} in ${state.city}.
+Live data: Temp ${w.temp || 28}°C (Feels ${w.feelsLike || 29}°C), AQI ${aqi.aqi || 85} (${aqi.category || 'Satisfactory'}, PM2.5 ${aqi.pm25 || 25}), Wind ${w.windKmh || 12} km/h (Gust ${w.gustKmh || 16}), Humidity ${w.humidity || 60}%, Rain ${w.rainChance || 15}%, UV ${w.uv || 4}, Condition ${w.description || 'Clear Sky'}.
+Target Language: ${targetLang.toUpperCase()} ("Hinglish" | "Hindi" | "English").
+Rules:
+1. If query is testing/slang/casual/tricky (e.g. cricket, walk, party, travel, sleep, pakode), answer smartly and politely by analyzing rain %, gusts, AQI & temp.
+2. Provide direct scientific causal advice for ${state.role}.
+Return STRICT JSON ONLY (no markdown fences):
 {
-  "reply": string (Crisp, highly sensible and logical response in requested language),
-  "verdict": string ("SAFE" | "CAUTION" | "NO-GO" | "HOLD"),
-  "advice": string (One punchy action takeaway),
-  "logic_points": [string, string],
-  "best_window": string (e.g. "Today after 5:30 PM" or "कल सुबह 6:00 AM"),
-  "confidence": number (85-98),
-  "confidence_reason": string,
-  "is_alert": boolean,
-  "alert_message": string
+  "reply": "Crisp 1-2 sentence answer in requested language",
+  "verdict": "SAFE" | "CAUTION" | "NO-GO",
+  "advice": "Punchy key action takeaway",
+  "logic_points": ["Specific reason with numbers", "Practical action guidance"],
+  "best_window": "e.g. Today after 4:00 PM or Now",
+  "confidence": 95,
+  "confidence_reason": "Live sensor telemetry verification",
+  "is_alert": false,
+  "alert_message": ""
 }
-
-User Question: "${userText}"`;
+Query: "${userText}"`;
 }
 
 async function realAsk(userText, targetLang) {
-  const res = await fetch(`${WORKER_URL}/ask`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: buildPrompt(userText, targetLang) })
-  });
-  const data = await res.json();
-  const textPart = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  const cleanJson = textPart.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
-  return JSON.parse(cleanJson);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3200);
+
+  try {
+    const res = await fetch(`${WORKER_URL}/ask`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt: buildPrompt(userText, targetLang) }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId);
+    const data = await res.json();
+    const textPart = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textPart) return null;
+    const cleanJson = textPart.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
+    return JSON.parse(cleanJson);
+  } catch (e) {
+    clearTimeout(timeoutId);
+    return null;
+  }
 }
 
 function fallbackResponse(userText, targetLang = "hinglish") {
