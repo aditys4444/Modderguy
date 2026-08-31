@@ -18,10 +18,11 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 /* =========================================================
-   I18N / MULTI-LANGUAGE SYSTEM
+   I18N / MULTI-LANGUAGE DICTIONARY
    ========================================================= */
 const I18N = {
   hinglish: {
+    brandSubtitle: "Intelligence AI",
     heroTitle: "Weather that talks your language.",
     heroSub: "Pick who you are — decisions, causal logic, AQI, and alerts are tuned specifically to your work.",
     farmerName: "Farmer / Kisaan",
@@ -30,7 +31,9 @@ const I18N = {
     fishermanDesc: "Wind gusts, swell height, sea roughness & go/no-go water safety",
     generalName: "General Public / Daily Life",
     generalDesc: "AQI health risks, travel advisories, what to wear & carry",
+    detectingLoc: "Detecting location…",
     searchPlaceholder: "Search city or village…",
+    feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai?)",
     pickRolePlaceholder: "Pick a role on the left to activate hyper-logical AI advisory.",
     demoBtn: "Demo mode",
@@ -52,9 +55,25 @@ const I18N = {
     votedThanks: "Vote register ho gaya! Shukriya.",
     alertTitle: "Weather & Safety Alert",
     autoDetected: "Auto-detected · sensor alert",
-    loginUnlockedTeaser: "ke liye exact Causal Logic & Best Window unlocked hai — login karke free mein dekho →"
+    loginUnlockedTeaser: "ke liye exact Causal Logic & Best Window unlocked hai — login karke free mein dekho →",
+    modalLoginTitle: "Welcome back",
+    modalLoginSub: "Log in to unlock full decision layers, causal logic, and voting.",
+    modalSignupTitle: "Create your account",
+    modalSignupSub: "Free — unlocks causal decisions, best windows, and community voting.",
+    modalEmailPlaceholder: "Email address",
+    modalPassPlaceholder: "Password",
+    modalContinueBtn: "Continue",
+    modalSignupBtn: "Sign up",
+    modalGoogleBtn: "Continue with Google",
+    modalGuestBtn: "⚡ Instant Free Access (Continue as Guest)",
+    modalNewHere: "New here?",
+    modalCreateAcc: "Create an account",
+    modalAlreadyAcc: "Already have an account?",
+    modalLogIn: "Log in",
+    logoutBtn: "Log out"
   },
   hindi: {
+    brandSubtitle: "इंटेलिजेंस AI",
     heroTitle: "मौसम जो आपकी भाषा में बात करे।",
     heroSub: "अपनी भूमिका चुनें — सटीक सलाह, कारण-तर्क (Causal Logic), AQI और अलर्ट आपके कार्य के अनुसार मिलेंगे।",
     farmerName: "किसान (Farmer)",
@@ -63,7 +82,9 @@ const I18N = {
     fishermanDesc: "हवा की गति, लहरों की ऊंचाई, समुद्र की स्थिति और पानी में उतरने का निर्णय",
     generalName: "आम नागरिक / दैनिक जीवन (General)",
     generalDesc: "वायु गुणवत्ता (AQI) स्वास्थ्य जोखिम, यात्रा सलाह, क्या पहनें और क्या साथ रखें",
+    detectingLoc: "स्थान खोजा जा रहा है…",
     searchPlaceholder: "शहर या गाँव खोजें…",
+    feelsLikePrefix: "महसूस",
     chatPlaceholder: "कुछ भी पूछें (उदा. क्या आज कीटनाशक का छिड़काव करें? नाव निकालना सुरक्षित है?)",
     pickRolePlaceholder: "तर्कसंगत AI मौसम सलाह शुरू करने के लिए बाईं ओर से अपनी भूमिका चुनें।",
     demoBtn: "डेमो मोड",
@@ -85,9 +106,25 @@ const I18N = {
     votedThanks: "आपका वोट दर्ज हो गया! धन्यवाद।",
     alertTitle: "मौसम एवं सुरक्षा अलर्ट",
     autoDetected: "स्वचालित सेंसर चेतावनी",
-    loginUnlockedTeaser: "के लिए सटीक तर्क और सर्वश्रेष्ठ समय उपलब्ध है — फ्री में देखने के लिए लॉगिन करें →"
+    loginUnlockedTeaser: "के लिए सटीक तर्क और सर्वश्रेष्ठ समय उपलब्ध है — फ्री में देखने के लिए लॉगिन करें →",
+    modalLoginTitle: "वापसी पर स्वागत है",
+    modalLoginSub: "पूरी तार्किक सलाह, वैज्ञानिक कारण और वोटिंग अनलॉक करने के लिए लॉगिन करें।",
+    modalSignupTitle: "नया खाता बनाएं",
+    modalSignupSub: "मुफ़्त — सटीक निर्णय, सर्वश्रेष्ठ समय और सामुदायिक वोटिंग अनलॉक करें।",
+    modalEmailPlaceholder: "ईमेल पता",
+    modalPassPlaceholder: "पासवर्ड",
+    modalContinueBtn: "आगे बढ़ें",
+    modalSignupBtn: "साइन अप करें",
+    modalGoogleBtn: "Google के साथ जारी रखें",
+    modalGuestBtn: "⚡ तुरंत मुफ़्त एक्सेस (Guest के रूप में)",
+    modalNewHere: "यहाँ नए हैं?",
+    modalCreateAcc: "खाता बनाएं",
+    modalAlreadyAcc: "पहले से खाता है?",
+    modalLogIn: "लॉग इन करें",
+    logoutBtn: "लॉग आउट"
   },
   english: {
+    brandSubtitle: "Intelligence AI",
     heroTitle: "Weather that talks your language.",
     heroSub: "Pick who you are — decisions, causal logic, AQI, and alerts are tuned specifically to your work.",
     farmerName: "Farmer",
@@ -96,7 +133,9 @@ const I18N = {
     fishermanDesc: "Wind gusts, swell height, sea roughness & go/no-go water safety",
     generalName: "General Public",
     generalDesc: "AQI health risks, travel advisories, what to wear & carry",
+    detectingLoc: "Detecting location…",
     searchPlaceholder: "Search city or village…",
+    feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Should I spray pesticides today? Is it safe to sail?)",
     pickRolePlaceholder: "Pick a role on the left to activate hyper-logical AI advisory.",
     demoBtn: "Demo mode",
@@ -118,19 +157,40 @@ const I18N = {
     votedThanks: "Vote registered! Thank you.",
     alertTitle: "Weather & Safety Alert",
     autoDetected: "Auto-detected · sensor alert",
-    loginUnlockedTeaser: "exact Causal Logic & Best Window unlocked — log in to view for free →"
+    loginUnlockedTeaser: "exact Causal Logic & Best Window unlocked — log in to view for free →",
+    modalLoginTitle: "Welcome back",
+    modalLoginSub: "Log in to unlock full decision layers, causal logic, and voting.",
+    modalSignupTitle: "Create your account",
+    modalSignupSub: "Free — unlocks causal decisions, best windows, and community voting.",
+    modalEmailPlaceholder: "Email address",
+    modalPassPlaceholder: "Password",
+    modalContinueBtn: "Continue",
+    modalSignupBtn: "Sign up",
+    modalGoogleBtn: "Continue with Google",
+    modalGuestBtn: "⚡ Instant Free Access (Continue as Guest)",
+    modalNewHere: "New here?",
+    modalCreateAcc: "Create an account",
+    modalAlreadyAcc: "Already have an account?",
+    modalLogIn: "Log in",
+    logoutBtn: "Log out"
   }
 };
 
 /* =========================================================
-   STATE MANAGEMENT
+   INITIALIZE CACHED USER & STATE
    ========================================================= */
+let cachedUser = null;
+try {
+  const saved = localStorage.getItem("weathergpt_user");
+  if (saved) cachedUser = JSON.parse(saved);
+} catch (e) {}
+
 const state = {
   lang: localStorage.getItem("weathergpt_lang") || "hinglish",
   role: null,
   city: null,
   coords: null,
-  user: null,
+  user: cachedUser,
   demoMode: false,
   monitorOn: false,
   monitorTimer: null,
@@ -169,7 +229,7 @@ const backToRoles     = $("backToRoles");
 const langSelect      = $("langSelect");
 
 /* =========================================================
-   LANGUAGE SWITCHING & UI LOCALIZATION
+   LANGUAGE SWITCHING & COMPREHENSIVE LOCALIZATION
    ========================================================= */
 if (langSelect) {
   langSelect.value = state.lang;
@@ -185,6 +245,7 @@ function applyLanguage(lang) {
   if (langSelect) langSelect.value = lang;
 
   const t = I18N[lang];
+  if ($("brandBadge")) $("brandBadge").textContent = t.brandSubtitle;
   if ($("heroTitle")) $("heroTitle").textContent = t.heroTitle;
   if ($("heroSub")) $("heroSub").textContent = t.heroSub;
   if ($("roleFarmerName")) $("roleFarmerName").textContent = t.farmerName;
@@ -207,6 +268,9 @@ function applyLanguage(lang) {
   if ($("lblRain")) $("lblRain").textContent = t.lblRain;
   if ($("lblVis")) $("lblVis").textContent = t.lblVis;
   if ($("lblPm")) $("lblPm").textContent = t.lblPm;
+  if ($("logoutBtn")) $("logoutBtn").textContent = t.logoutBtn;
+
+  renderAuthMode();
 }
 
 // Initial language apply
@@ -263,7 +327,8 @@ $("cityInput").addEventListener("keydown", (e) => {
 });
 
 function detectLocation() {
-  $("cityName").textContent = "Detecting location\u2026";
+  const t = I18N[state.lang] || I18N.hinglish;
+  $("cityName").textContent = t.detectingLoc;
   if (!navigator.geolocation) {
     fetchWeatherByCity("Mumbai");
     return;
@@ -381,6 +446,7 @@ function getUvCategory(uv) {
 function applyEnrichedWeather(forecast, aqi) {
   const cur = forecast.current || {};
   const curAqi = aqi.current || {};
+  const t = I18N[state.lang] || I18N.hinglish;
 
   const temp = Math.round(cur.temperature_2m ?? 28);
   const feelsLike = Math.round(cur.apparent_temperature ?? temp);
@@ -399,7 +465,7 @@ function applyEnrichedWeather(forecast, aqi) {
   // Update UI Elements
   $("cityName").textContent = state.city;
   $("tempVal").textContent = `${temp}\u00b0`;
-  $("feelsLikeVal").textContent = `Feels ${feelsLike}\u00b0`;
+  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}\u00b0`;
   $("condText").textContent = desc;
   $("windVal").textContent = `${windKmh} km/h ${windDir} (G: ${gustKmh})`;
   $("humVal").textContent = `${humidity}%`;
@@ -428,6 +494,7 @@ function applyEnrichedWeather(forecast, aqi) {
 
 function applyWeather(data) {
   state.city = data.name + (data.sys && data.sys.country ? `, ${data.sys.country}` : "");
+  const t = I18N[state.lang] || I18N.hinglish;
   const temp = Math.round(data.main.temp);
   const feelsLike = Math.round(data.main.feels_like || temp);
   const humidity = data.main.humidity;
@@ -436,7 +503,7 @@ function applyWeather(data) {
 
   $("cityName").textContent = state.city;
   $("tempVal").textContent = `${temp}\u00b0`;
-  $("feelsLikeVal").textContent = `Feels ${feelsLike}\u00b0`;
+  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}\u00b0`;
   $("condText").textContent = desc;
   $("windVal").textContent = `${windKmh} km/h`;
   $("humVal").textContent = `${humidity}%`;
@@ -450,6 +517,7 @@ function applyWeather(data) {
 }
 
 function applyDemoWeather(city) {
+  const t = I18N[state.lang] || I18N.hinglish;
   const demo = {
     city: city || "Demo City",
     temp: 31,
@@ -471,7 +539,7 @@ function applyDemoWeather(city) {
 
   $("cityName").textContent = demo.city;
   $("tempVal").textContent = `${demo.temp}\u00b0`;
-  $("feelsLikeVal").textContent = `Feels ${demo.feelsLike}\u00b0`;
+  $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${demo.feelsLike}\u00b0`;
   $("condText").textContent = demo.description;
   $("windVal").textContent = `${demo.windKmh} km/h ${demo.windDir} (G: ${demo.gustKmh})`;
   $("humVal").textContent = `${demo.humidity}%`;
@@ -901,6 +969,15 @@ function adviceBlockHtml(result) {
     </div>`;
 }
 
+// Global click handler for teaser cards
+window.handleTeaserClick = function(teaserId) {
+  if (state.user) {
+    revealPendingTeasers();
+  } else {
+    openLoginModal();
+  }
+};
+
 function renderAssistantResult(result) {
   const row = document.createElement("div");
   row.className = "msg-row assistant";
@@ -912,7 +989,7 @@ function renderAssistantResult(result) {
     inner += adviceBlockHtml(result);
   } else if (!state.user && result.advice) {
     teaserId = "teaser-" + Math.random().toString(36).slice(2);
-    inner += `<div class="teaser-line" id="${teaserId}" onclick="openLoginModal()">&#128274; <strong>${ROLE_META[state.role]?.label}</strong> ${t.loginUnlockedTeaser}</div>`;
+    inner += `<div class="teaser-line" id="${teaserId}" onclick="handleTeaserClick('${teaserId}')">&#128274; <strong>${ROLE_META[state.role]?.label}</strong> ${t.loginUnlockedTeaser}</div>`;
   }
 
   row.innerHTML = `<div class="avatar">${ROLE_META[state.role]?.icon || "&#127777;&#65039;"}</div><div style="display:flex;flex-direction:column;max-width:84%;">${inner}</div>`;
@@ -927,8 +1004,14 @@ function revealPendingTeasers() {
   while (pendingTeasers.length) {
     const { id, result } = pendingTeasers.pop();
     const el = document.getElementById(id);
-    if (el) el.outerHTML = adviceBlockHtml(result);
+    if (el) {
+      el.outerHTML = adviceBlockHtml(result);
+    }
   }
+  // Double check any remaining teaser line in DOM
+  document.querySelectorAll(".teaser-line").forEach(el => {
+    el.style.display = "none";
+  });
 }
 
 function formatMarkdown(text) {
@@ -1129,15 +1212,28 @@ async function checkForSevereConditions() {
 }
 
 /* =========================================================
-   FIREBASE AUTH
+   FIREBASE AUTH & ZERO-REFRESH LOGIN SYSTEM
    ========================================================= */
-$("loginTrigger").addEventListener("click", () => { if (state.user) toggleAccountMenu(); else openLoginModal(); });
+$("loginTrigger").addEventListener("click", () => {
+  if (state.user) toggleAccountMenu();
+  else openLoginModal();
+});
 $("closeModal").addEventListener("click", closeLoginModal);
-$("loginModal").addEventListener("click", (e) => { if (e.target.id === "loginModal") closeLoginModal(); });
+$("loginModal").addEventListener("click", (e) => {
+  if (e.target.id === "loginModal") closeLoginModal();
+});
 
-function openLoginModal() { $("accountMenu").classList.remove("visible"); $("loginModal").classList.add("visible"); }
-function closeLoginModal() { $("loginModal").classList.remove("visible"); $("modalErr").textContent = ""; }
-function toggleAccountMenu() { $("accountMenu").classList.toggle("visible"); }
+function openLoginModal() {
+  $("accountMenu").classList.remove("visible");
+  $("loginModal").classList.add("visible");
+}
+function closeLoginModal() {
+  $("loginModal").classList.remove("visible");
+  $("modalErr").textContent = "";
+}
+function toggleAccountMenu() {
+  $("accountMenu").classList.toggle("visible");
+}
 
 document.addEventListener("click", (e) => {
   const menu = $("accountMenu");
@@ -1146,28 +1242,65 @@ document.addEventListener("click", (e) => {
   menu.classList.remove("visible");
 });
 
-$("logoutBtn").addEventListener("click", async () => { await auth.signOut(); $("accountMenu").classList.remove("visible"); });
+$("logoutBtn").addEventListener("click", async () => {
+  try { await auth.signOut(); } catch (e) {}
+  state.user = null;
+  localStorage.removeItem("weathergpt_user");
+  updateAuthUI();
+  $("accountMenu").classList.remove("visible");
+});
 
-$("switchModeLink").addEventListener("click", () => { state.authMode = state.authMode === "login" ? "signup" : "login"; renderAuthMode(); });
+$("switchModeLink").addEventListener("click", () => {
+  state.authMode = state.authMode === "login" ? "signup" : "login";
+  renderAuthMode();
+});
 
 function renderAuthMode() {
+  const t = I18N[state.lang] || I18N.hinglish;
   if (state.authMode === "login") {
-    $("modalTitle").textContent = "Welcome back";
-    $("modalSub").textContent = "Log in to unlock full decision layers, causal logic, and voting.";
-    $("emailAuthBtn").textContent = "Continue";
-    $("switchModeText").innerHTML = `New here? <span id="switchModeLink">Create an account</span>`;
+    $("modalTitle").textContent = t.modalLoginTitle;
+    $("modalSub").textContent = t.modalLoginSub;
+    $("emailAuthBtn").textContent = t.modalContinueBtn;
+    $("switchModeText").innerHTML = `${t.modalNewHere} <span id="switchModeLink">${t.modalCreateAcc}</span>`;
   } else {
-    $("modalTitle").textContent = "Create your account";
-    $("modalSub").textContent = "Free \u2014 unlocks causal decisions, best windows, and community voting.";
-    $("emailAuthBtn").textContent = "Sign up";
-    $("switchModeText").innerHTML = `Already have an account? <span id="switchModeLink">Log in</span>`;
+    $("modalTitle").textContent = t.modalSignupTitle;
+    $("modalSub").textContent = t.modalSignupSub;
+    $("emailAuthBtn").textContent = t.modalSignupBtn;
+    $("switchModeText").innerHTML = `${t.modalAlreadyAcc} <span id="switchModeLink">${t.modalLogIn}</span>`;
   }
+  $("emailInput").placeholder = t.modalEmailPlaceholder;
+  $("passInput").placeholder = t.modalPassPlaceholder;
+  $("googleAuthBtn").textContent = t.modalGoogleBtn;
+  if ($("guestAuthBtn")) $("guestAuthBtn").textContent = t.modalGuestBtn;
+
   document.getElementById("switchModeLink").addEventListener("click", () => {
     state.authMode = state.authMode === "login" ? "signup" : "login";
     renderAuthMode();
   });
 }
 
+function handleLoginSuccess(userObj) {
+  state.user = userObj;
+  localStorage.setItem("weathergpt_user", JSON.stringify({
+    uid: userObj.uid,
+    email: userObj.email || "Active User"
+  }));
+  closeLoginModal();
+  updateAuthUI();
+  // Instantly unlock all decision teasers & voting buttons without reload!
+  revealPendingTeasers();
+  refreshPendingVerifyCards();
+  persistUserPrefs();
+}
+
+function updateAuthUI() {
+  const isLogged = !!state.user;
+  $("loginTrigger").classList.toggle("active", isLogged);
+  $("loginTrigger").innerHTML = isLogged ? "&#9989;" : "&#128100;";
+  $("accountEmail").textContent = isLogged ? (state.user.email || "Active User") : "";
+}
+
+// Email Auth
 $("emailAuthBtn").addEventListener("click", async () => {
   const email = $("emailInput").value.trim();
   const pass  = $("passInput").value;
@@ -1175,34 +1308,63 @@ $("emailAuthBtn").addEventListener("click", async () => {
   errEl.textContent = "";
   if (!email || !pass) { errEl.textContent = "Enter both email and password."; return; }
   try {
-    if (state.authMode === "login") await auth.signInWithEmailAndPassword(email, pass);
-    else await auth.createUserWithEmailAndPassword(email, pass);
-    closeLoginModal();
-  } catch (e) { errEl.textContent = humanizeAuthError(e); }
+    let res;
+    if (state.authMode === "login") {
+      res = await auth.signInWithEmailAndPassword(email, pass);
+    } else {
+      res = await auth.createUserWithEmailAndPassword(email, pass);
+    }
+    handleLoginSuccess(res.user);
+  } catch (e) {
+    errEl.textContent = humanizeAuthError(e);
+  }
 });
 
+// Google Auth
 $("googleAuthBtn").addEventListener("click", async () => {
   const provider = new firebase.auth.GoogleAuthProvider();
-  try { await auth.signInWithPopup(provider); closeLoginModal(); }
-  catch (e) { $("modalErr").textContent = humanizeAuthError(e); }
+  try {
+    const res = await auth.signInWithPopup(provider);
+    handleLoginSuccess(res.user);
+  } catch (e) {
+    $("modalErr").textContent = humanizeAuthError(e);
+  }
 });
+
+// Instant Guest Auth (Zero barrier, instant unlock)
+if ($("guestAuthBtn")) {
+  $("guestAuthBtn").addEventListener("click", () => {
+    const guestUser = {
+      uid: "guest_" + Math.random().toString(36).slice(2, 10),
+      email: "Guest User (Unlocked)"
+    };
+    handleLoginSuccess(guestUser);
+  });
+}
 
 function humanizeAuthError(e) {
   const code = e && e.code || "";
   if (code.includes("wrong-password") || code.includes("invalid-credential")) return "Incorrect email or password.";
   if (code.includes("user-not-found"))      return "No account found with that email.";
-  if (code.includes("email-already-in-use")) return "That email is already registered \u2014 try logging in.";
+  if (code.includes("email-already-in-use")) return "That email is already registered — try logging in.";
   if (code.includes("weak-password"))        return "Password should be at least 6 characters.";
-  return "Something went wrong. Please try again.";
+  return "Something went wrong. Please try again or use Instant Guest Access.";
 }
 
+// Firebase Auth State Listener
 auth.onAuthStateChanged(async (user) => {
-  state.user = user;
-  $("loginTrigger").classList.toggle("active", !!user);
-  $("loginTrigger").innerHTML = user ? "&#9989;" : "&#128100;";
-  $("accountEmail").textContent = user ? user.email : "";
-  if (user) { await loadUserPrefs(); revealPendingTeasers(); refreshPendingVerifyCards(); }
-  else { $("accountMenu").classList.remove("visible"); }
+  if (user) {
+    state.user = user;
+    localStorage.setItem("weathergpt_user", JSON.stringify({ uid: user.uid, email: user.email }));
+    updateAuthUI();
+    await loadUserPrefs();
+    revealPendingTeasers();
+    refreshPendingVerifyCards();
+  } else if (!localStorage.getItem("weathergpt_user")) {
+    state.user = null;
+    updateAuthUI();
+    $("accountMenu").classList.remove("visible");
+  }
 });
 
 async function persistUserPrefs() {
@@ -1228,6 +1390,7 @@ async function loadUserPrefs() {
 }
 
 /* =========================================================
-   INIT
+   INITIALIZATION
    ========================================================= */
+updateAuthUI();
 renderAuthMode();
