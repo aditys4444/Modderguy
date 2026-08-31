@@ -36,7 +36,7 @@ const I18N = {
     generalDesc: "AQI particulate risks, UV protection, rain windows & what to carry",
     btnLaunchGeneral: "Open General Console",
     detectingLoc: "Detecting location…",
-    searchPlaceholder: "Search city, district or village (e.g. Mumbai, Pune, Patna)…",
+    searchPlaceholder: "Search city, district, village (e.g. Borivali, Assam, Odisha, Patna)…",
     feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai?)",
     lblHomeBack: "Home",
@@ -91,7 +91,7 @@ const I18N = {
     generalDesc: "वायु गुणवत्ता (AQI) स्वास्थ्य जोखिम, UV सुरक्षा, बारिश का समय और क्या साथ रखें",
     btnLaunchGeneral: "सामान्य कंसोल खोलें",
     detectingLoc: "स्थान खोजा जा रहा है…",
-    searchPlaceholder: "शहर, जिला या गाँव खोजें (उदा. मुंबई, पुणे, पटना)…",
+    searchPlaceholder: "शहर, जिला या गाँव खोजें (उदा. बोरीवली, असम, ओडिशा, पटना)…",
     feelsLikePrefix: "महसूस",
     chatPlaceholder: "कुछ भी पूछें (उदा. क्या आज कीटनाशक का छिड़काव करें? नाव निकालना सुरक्षित है?)",
     lblHomeBack: "होम",
@@ -146,7 +146,7 @@ const I18N = {
     generalDesc: "AQI particulate risks, UV protection, rain windows & what to carry",
     btnLaunchGeneral: "Open General Console",
     detectingLoc: "Detecting location…",
-    searchPlaceholder: "Search city, district or village (e.g. Mumbai, Pune, Patna)…",
+    searchPlaceholder: "Search city, district, village (e.g. Borivali, Assam, Odisha, Patna)…",
     feelsLikePrefix: "Feels",
     chatPlaceholder: "Ask anything (e.g. Should I spray pesticides today? Is it safe to sail?)",
     lblHomeBack: "Home",
@@ -253,6 +253,33 @@ const SUGGESTIONS = {
 };
 
 /* =========================================================
+   INDIA-PRIORITIZED KNOWN REGIONS DICTIONARY
+   ========================================================= */
+const KNOWN_REGIONS = {
+  "assam": { name: "Assam", admin1: "Assam", lat: 26.2006, lon: 92.9376, country: "India" },
+  "odisha": { name: "Odisha", admin1: "Odisha", lat: 20.9517, lon: 85.0985, country: "India" },
+  "orissa": { name: "Odisha", admin1: "Odisha", lat: 20.9517, lon: 85.0985, country: "India" },
+  "dahisar": { name: "Dahisar", admin1: "Mumbai, Maharashtra", lat: 19.2575, lon: 72.8596, country: "India" },
+  "borivali": { name: "Borivali", admin1: "Mumbai, Maharashtra", lat: 19.2307, lon: 72.8567, country: "India" },
+  "kandivali": { name: "Kandivali", admin1: "Mumbai, Maharashtra", lat: 19.2047, lon: 72.8525, country: "India" },
+  "malad": { name: "Malad", admin1: "Mumbai, Maharashtra", lat: 19.1860, lon: 72.8485, country: "India" },
+  "andheri": { name: "Andheri", admin1: "Mumbai, Maharashtra", lat: 19.1136, lon: 72.8697, country: "India" },
+  "bandra": { name: "Bandra", admin1: "Mumbai, Maharashtra", lat: 19.0596, lon: 72.8295, country: "India" },
+  "thane": { name: "Thane", admin1: "Maharashtra", lat: 19.2183, lon: 72.9781, country: "India" },
+  "navi mumbai": { name: "Navi Mumbai", admin1: "Maharashtra", lat: 19.0330, lon: 73.0297, country: "India" },
+  "bihar": { name: "Patna", admin1: "Bihar", lat: 25.5941, lon: 85.1376, country: "India" },
+  "maharashtra": { name: "Maharashtra", admin1: "Maharashtra", lat: 19.7515, lon: 75.7139, country: "India" },
+  "punjab": { name: "Punjab", admin1: "Punjab", lat: 31.1471, lon: 75.3412, country: "India" },
+  "haryana": { name: "Haryana", admin1: "Haryana", lat: 29.0588, lon: 76.0856, country: "India" },
+  "uttar pradesh": { name: "Lucknow", admin1: "Uttar Pradesh", lat: 26.8467, lon: 80.9462, country: "India" },
+  "up": { name: "Lucknow", admin1: "Uttar Pradesh", lat: 26.8467, lon: 80.9462, country: "India" },
+  "gujarat": { name: "Ahmedabad", admin1: "Gujarat", lat: 23.0225, lon: 72.5714, country: "India" },
+  "kerala": { name: "Thiruvananthapuram", admin1: "Kerala", lat: 8.5241, lon: 76.9366, country: "India" },
+  "tamil nadu": { name: "Chennai", admin1: "Tamil Nadu", lat: 13.0827, lon: 80.2707, country: "India" },
+  "west bengal": { name: "Kolkata", admin1: "West Bengal", lat: 22.5726, lon: 88.3639, country: "India" }
+};
+
+/* =========================================================
    INITIALIZE USER & STATE
    ========================================================= */
 let cachedUser = null;
@@ -264,7 +291,7 @@ try {
 const state = {
   lang: localStorage.getItem("weathergpt_lang") || "hinglish",
   role: null,
-  city: "Mumbai, India",
+  city: "Mumbai, Maharashtra, India",
   coords: { lat: 19.076, lon: 72.8777 },
   user: cachedUser,
   demoMode: false,
@@ -355,10 +382,8 @@ function openConsoleScreen(role) {
   $("activePersonaLabel").textContent = `${t.activeConsolePrefix} ${m.label}`;
   $("consoleCityName").textContent = state.city || "Location";
 
-  // Populate Suggestion Chips for this Persona
   renderSuggestionChips(role);
 
-  // Send Initial Assistant Welcome if empty
   if (messagesEl.children.length === 0) {
     addAssistantText(`${t.welcomePrefix} **${m.label} Console**. ${t.welcomeSuffix}`);
   }
@@ -387,28 +412,134 @@ function renderSuggestionChips(role) {
   });
 }
 
-// Interactive Feature Cards on Home Screen
-$("featCausal")?.addEventListener("click", () => {
-  openConsoleScreen("farmer");
-  $("chatInput").value = "Is pesticide spray safe today with current wind speed?";
-  sendMessage();
-});
+/* =========================================================
+   FEATURE EXPLAINER MODAL (Informative details, no abrupt jumps)
+   ========================================================= */
+const featureModal = $("featureModal");
+const closeFeatureModal = $("closeFeatureModal");
+const featModalActionBtn = $("featModalActionBtn");
 
-$("featAqi")?.addEventListener("click", () => {
-  openConsoleScreen("general");
-  $("chatInput").value = "Explain today's live AQI health risk and outdoor exercise safety.";
-  sendMessage();
-});
+const FEATURE_DATA = {
+  causal: {
+    icon: "🧠",
+    title: "Causal Logic AI Engine",
+    sub: "Scientific cause-and-effect reasoning vs raw probability forecasts.",
+    body: `
+      <p>Traditional weather apps only give broad percentages like <em>"40% rain"</em> without explaining how atmospheric parameters interact with your actual work.</p>
+      <strong>How WeatherGPT Causal Intelligence Works:</strong>
+      <ul>
+        <li><strong>Physical Force Interaction:</strong> Calculates spray drift risk when 10m wind gusts cross 15 km/h, preventing chemical wastage and crop burn.</li>
+        <li><strong>Marine Roughness Threshold:</strong> Correlates wind velocity with swell chop and deep-sea squall probability to give definite <code>[SAFE]</code>, <code>[CAUTION]</code>, or <code>[NO-GO]</code> water verdicts.</li>
+        <li><strong>Best Window Calculation:</strong> Automatically computes the exact timeframe when conditions normalize.</li>
+      </ul>
+    `,
+    actionText: "Open Farmer / Causal Console →",
+    targetRole: "farmer"
+  },
+  aqi: {
+    icon: "🌫️",
+    title: "Real-Time Sensor Telemetry & AQI",
+    sub: "Live multi-parameter atmospheric analysis across 6 critical metrics.",
+    body: `
+      <p>WeatherGPT connects to live satellite, radar, and ground-station telemetry streams to calculate real-time environmental stress factors:</p>
+      <ul>
+        <li><strong>US AQI & PM2.5 Micro-particles:</strong> Analyzes particulate matter concentration and provides health/mask advisories.</li>
+        <li><strong>UV Radiation Index:</strong> Monitors solar UV index to advise skin protection during peak midday hours.</li>
+        <li><strong>Wind Gust Dynamics:</strong> Tracks 10m wind speeds and localized surface gusts.</li>
+        <li><strong>Relative Humidity & Visibility:</strong> Real-time atmospheric moisture tracking.</li>
+      </ul>
+    `,
+    actionText: "Open General Health Console →",
+    targetRole: "general"
+  },
+  crowd: {
+    icon: "👥",
+    title: "Crowd Verification & Ground Truth",
+    sub: "Community-driven alert confirmation system for micro-climate events.",
+    body: `
+      <p>Sudden localized squalls, dust storms, and micro-bursts develop rapidly. WeatherGPT merges sensor data with live ground confirmations from verified users.</p>
+      <ul>
+        <li><strong>Sensor Alert Trigger:</strong> Automatic severity detection when wind or pollution spikes occur.</li>
+        <li><strong>Community Consensus:</strong> Real-time <em>Yes / No</em> confirmation voting stored seamlessly in Firestore.</li>
+        <li><strong>Optimistic Reliability:</strong> Instant ground-truth confirmation badges displayed to everyone nearby.</li>
+      </ul>
+    `,
+    actionText: "Explore Maritime & Alert Console →",
+    targetRole: "fisherman"
+  }
+};
 
-$("featCrowd")?.addEventListener("click", () => {
-  renderAlertCard("Ground-truth verification enabled: Sensor network automatically validates localized squalls & gust spikes.", true);
-  openConsoleScreen("general");
+function openFeatureExplainer(key) {
+  const feat = FEATURE_DATA[key];
+  if (!feat) return;
+  $("featModalIcon").textContent = feat.icon;
+  $("featModalTitle").textContent = feat.title;
+  $("featModalSub").textContent = feat.sub;
+  $("featModalBody").innerHTML = feat.body;
+  featModalActionBtn.textContent = feat.actionText;
+  featModalActionBtn.onclick = () => {
+    featureModal.classList.remove("visible");
+    openConsoleScreen(feat.targetRole);
+  };
+  featureModal.classList.add("visible");
+}
+
+$("featCausal")?.addEventListener("click", () => openFeatureExplainer("causal"));
+$("featAqi")?.addEventListener("click", () => openFeatureExplainer("aqi"));
+$("featCrowd")?.addEventListener("click", () => openFeatureExplainer("crowd"));
+
+closeFeatureModal?.addEventListener("click", () => featureModal.classList.remove("visible"));
+featureModal?.addEventListener("click", (e) => {
+  if (e.target.id === "featureModal") featureModal.classList.remove("visible");
 });
 
 /* =========================================================
-   LOCATION SEARCH & AUTOCOMPLETE AUTO-SUGGEST ENGINE
+   INDIA-PRIORITIZED LOCATION SEARCH & AUTOCOMPLETE ENGINE
    ========================================================= */
 let searchDebounceTimer = null;
+
+async function searchGeocoding(query) {
+  const qLower = query.toLowerCase().trim();
+  const list = [];
+
+  // Check known dictionary first (e.g. Dahisar, Borivali, Assam, Odisha)
+  for (const [key, item] of Object.entries(KNOWN_REGIONS)) {
+    if (key.includes(qLower) || qLower.includes(key)) {
+      list.push({
+        name: item.name,
+        admin1: item.admin1,
+        country: item.country,
+        country_code: "IN",
+        latitude: item.lat,
+        longitude: item.lon,
+        isPriority: true
+      });
+    }
+  }
+
+  // Fetch Open-Meteo Geocoding
+  try {
+    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=20&language=en&format=json`);
+    const data = await res.json();
+    if (data && data.results && data.results.length > 0) {
+      const indiaResults = [];
+      const globalResults = [];
+
+      data.results.forEach(loc => {
+        const isIndia = loc.country_code === "IN" || (loc.country || "").toLowerCase() === "india";
+        if (isIndia) indiaResults.push(loc);
+        else globalResults.push(loc);
+      });
+
+      // Priority sort: Known matches -> Indian results -> Global results
+      return [...list, ...indiaResults, ...globalResults].slice(0, 8);
+    }
+  } catch (err) {
+    console.error("Geocoding fetch error:", err);
+  }
+
+  return list.slice(0, 8);
+}
 
 function setupAutocomplete(inputId, dropdownId, onSelectCallback) {
   const input = $(inputId);
@@ -426,26 +557,21 @@ function setupAutocomplete(inputId, dropdownId, onSelectCallback) {
     }
 
     searchDebounceTimer = setTimeout(async () => {
-      try {
-        const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=7&language=en&format=json`);
-        const data = await res.json();
-        if (data && data.results && data.results.length > 0) {
-          renderSuggestions(data.results, dropdown, (item) => {
-            input.value = item.name;
-            dropdown.style.display = "none";
-            onSelectCallback(item);
-          });
-        } else {
-          dropdown.innerHTML = `<div class="city-sugg-item" style="color:var(--text-dim);">No locations found for "${escapeHtml(query)}"</div>`;
-          dropdown.style.display = "flex";
-        }
-      } catch (err) {
-        console.error("Autocomplete fetch error:", err);
+      const results = await searchGeocoding(query);
+      if (results.length > 0) {
+        renderSuggestions(results, dropdown, (item) => {
+          input.value = item.name;
+          dropdown.style.display = "none";
+          onSelectCallback(item);
+        });
+      } else {
+        dropdown.innerHTML = `<div class="city-sugg-item" style="color:var(--text-dim);">No locations found for "${escapeHtml(query)}"</div>`;
+        dropdown.style.display = "flex";
       }
     }, 220);
   });
 
-  input.addEventListener("keydown", (e) => {
+  input.addEventListener("keydown", async (e) => {
     if (e.key === "Enter") {
       dropdown.style.display = "none";
       const q = input.value.trim();
@@ -462,16 +588,24 @@ function setupAutocomplete(inputId, dropdownId, onSelectCallback) {
 
 function renderSuggestions(results, dropdown, onSelect) {
   dropdown.innerHTML = "";
+  // De-duplicate by name + admin1
+  const seen = new Set();
   results.forEach(loc => {
+    const key = `${loc.name}_${loc.admin1}_${loc.country}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+
     const div = document.createElement("div");
     div.className = "city-sugg-item";
     const stateText = loc.admin1 ? `${loc.admin1}, ` : "";
+    const countryFlag = loc.country_code === "IN" || (loc.country || "").toLowerCase() === "india" ? "🇮🇳 " : "";
+
     div.innerHTML = `
       <div class="city-sugg-main">
         <span>📍</span>
         <span>${escapeHtml(loc.name)}</span>
       </div>
-      <div class="city-sugg-country">${escapeHtml(stateText + (loc.country || ""))}</div>
+      <div class="city-sugg-country">${countryFlag}${escapeHtml(stateText + (loc.country || ""))}</div>
     `;
     div.addEventListener("click", () => onSelect(loc));
     dropdown.appendChild(div);
@@ -481,8 +615,9 @@ function renderSuggestions(results, dropdown, onSelect) {
 
 // Setup Home Search
 setupAutocomplete("cityInput", "citySuggestions", (loc) => {
-  const displayCity = `${loc.name}${loc.admin1 ? `, ${loc.admin1}` : ""}${loc.country ? `, ${loc.country}` : ""}`;
-  state.city = displayCity;
+  const adminPart = loc.admin1 ? `, ${loc.admin1}` : "";
+  const countryPart = loc.country ? `, ${loc.country}` : "";
+  state.city = `${loc.name}${adminPart}${countryPart}`;
   state.coords = { lat: loc.latitude, lon: loc.longitude };
   fetchAllWeatherData(loc.latitude, loc.longitude, loc.name, loc.country);
 });
@@ -492,7 +627,7 @@ $("searchCityBtn")?.addEventListener("click", () => {
   if (q) fetchWeatherByCity(q);
 });
 
-// Location Change Modal for Console Screen
+// Location Change Modal in Console
 $("consoleCityBtn")?.addEventListener("click", () => {
   $("cityModal").classList.add("visible");
 });
@@ -504,8 +639,9 @@ $("cityModal")?.addEventListener("click", (e) => {
 });
 
 setupAutocomplete("modalCityInput", "modalCitySuggestions", (loc) => {
-  const displayCity = `${loc.name}${loc.admin1 ? `, ${loc.admin1}` : ""}${loc.country ? `, ${loc.country}` : ""}`;
-  state.city = displayCity;
+  const adminPart = loc.admin1 ? `, ${loc.admin1}` : "";
+  const countryPart = loc.country ? `, ${loc.country}` : "";
+  state.city = `${loc.name}${adminPart}${countryPart}`;
   state.coords = { lat: loc.latitude, lon: loc.longitude };
   fetchAllWeatherData(loc.latitude, loc.longitude, loc.name, loc.country);
   $("cityModal").classList.remove("visible");
@@ -602,10 +738,9 @@ async function fetchWeatherByCity(city) {
   if (state.demoMode) return applyDemoWeather(city);
   $("cityName").textContent = `Searching ${city}…`;
   try {
-    const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`);
-    const geoData = await geoRes.json();
-    if (geoData && geoData.results && geoData.results.length > 0) {
-      const loc = geoData.results[0];
+    const results = await searchGeocoding(city);
+    if (results.length > 0) {
+      const loc = results[0];
       state.coords = { lat: loc.latitude, lon: loc.longitude };
       state.city = `${loc.name}${loc.admin1 ? `, ${loc.admin1}` : ""}${loc.country ? `, ${loc.country}` : ""}`;
       await fetchAllWeatherData(loc.latitude, loc.longitude, loc.name, loc.country);

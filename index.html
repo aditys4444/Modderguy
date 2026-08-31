@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Main Stylesheet with Cache Busting -->
-  <link rel="stylesheet" href="style.css?v=2.2" />
+  <link rel="stylesheet" href="style.css?v=2.3" />
 </head>
 <body>
 
@@ -113,10 +113,10 @@
             </div>
           </div>
 
-          <!-- Quick City Search with Live Autocomplete Suggestions -->
+          <!-- Quick City Search with India-Prioritized Autocomplete -->
           <div class="search-wrapper">
             <div class="hero-search-bar">
-              <input id="cityInput" placeholder="Search city, district or village (e.g. Mumbai, Pune, Patna)…" autocomplete="off" />
+              <input id="cityInput" placeholder="Search city, district, village (e.g. Borivali, Assam, Odisha, Patna)…" autocomplete="off" />
               <button id="searchCityBtn" title="Search Location">&#128269;</button>
               <button id="detectBtn" title="Detect GPS Location">&#128204; GPS</button>
             </div>
@@ -184,27 +184,27 @@
           </div>
         </div>
 
-        <!-- Product Value Prop Highlights (Clickable Feature Insights) -->
+        <!-- Product Value Prop Highlights (Clickable Feature Explainers) -->
         <div class="product-features-row">
           <div class="feature-item" id="featCausal" title="Learn about Causal AI">
             <span class="f-icon">🧠</span>
             <div>
               <strong>Causal Logic AI</strong>
-              <p>Direct cause-and-effect science (Kyun &amp; Kaise)</p>
+              <p>Direct cause-and-effect science (Kyun &amp; Kaise) ℹ️</p>
             </div>
           </div>
-          <div class="feature-item" id="featAqi" title="View live sensor telemetry">
+          <div class="feature-item" id="featAqi" title="View live sensor telemetry details">
             <span class="f-icon">🌫️</span>
             <div>
               <strong>Live AQI &amp; Sensors</strong>
-              <p>Real-time PM2.5, UV, and gust telemetry</p>
+              <p>Real-time PM2.5, UV, and gust telemetry ℹ️</p>
             </div>
           </div>
           <div class="feature-item" id="featCrowd" title="Learn about crowd ground-truth">
             <span class="f-icon">👥</span>
             <div>
               <strong>Crowd Verification</strong>
-              <p>Ground-truth community confirmations</p>
+              <p>Ground-truth community confirmations ℹ️</p>
             </div>
           </div>
         </div>
@@ -298,21 +298,41 @@
   </div>
 
   <!-- =========================================================
+       FEATURE EXPLAINER MODAL (Informative, not jumping to chat)
+       ========================================================= -->
+  <div id="featureModal" class="modal-backdrop">
+    <div class="modal-card">
+      <button class="modal-close" id="closeFeatureModal" aria-label="Close modal">&#10005;</button>
+      <div class="feature-modal-icon-box">
+        <span class="f-modal-icon" id="featModalIcon">🧠</span>
+      </div>
+      <h2 id="featModalTitle">Causal Logic AI</h2>
+      <p class="sub" id="featModalSub">Scientific cause-and-effect meteorological decision engine.</p>
+      
+      <div class="feature-modal-body" id="featModalBody">
+        <!-- Content dynamically injected via JS -->
+      </div>
+      
+      <button class="primary-btn" id="featModalActionBtn" style="margin-top:16px;">Open Intelligence Console</button>
+    </div>
+  </div>
+
+  <!-- =========================================================
        LOCATION SEARCH MODAL (Quick change in Console Screen)
        ========================================================= -->
   <div id="cityModal" class="modal-backdrop">
     <div class="modal-card">
       <button class="modal-close" id="closeCityModal" aria-label="Close modal">&#10005;</button>
       <h2>Select Location</h2>
-      <p class="sub">Search any city, district or village across India or worldwide.</p>
+      <p class="sub">Search any city, locality, district, or state across India and worldwide.</p>
       
       <div class="search-wrapper">
         <div class="hero-search-bar" style="margin-bottom:10px;">
-          <input id="modalCityInput" placeholder="Type city (e.g. Mumbai, Pune, Patna)…" autocomplete="off" />
+          <input id="modalCityInput" placeholder="Search (e.g. Borivali, Assam, Odisha, Patna)…" autocomplete="off" />
           <button id="modalSearchBtn">&#128269;</button>
           <button id="modalGpsBtn">&#128204; GPS</button>
         </div>
-        <div id="modalCitySuggestions" class="modal-city-suggestions"></div>
+        <div id="modalCitySuggestions" class="city-suggestions-dropdown" style="position:static; display:none;"></div>
       </div>
     </div>
   </div>
@@ -352,6 +372,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- Application Logic with Cache Busting -->
-  <script src="app.js?v=2.2"></script>
+  <script src="app.js?v=2.3"></script>
 </body>
 </html>

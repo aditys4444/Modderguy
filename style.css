@@ -1177,7 +1177,36 @@ img {
   margin-top: 16px;
 }
 .modal-card .switch-row span { color: var(--accent); font-weight: 600; cursor: pointer; }
-.modal-err { color: var(--danger); font-size: 12px; margin-bottom: 8px; min-height: 16px; }
+/* Feature Explainer Modal Styles */
+.feature-modal-icon-box {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.f-modal-icon {
+  font-size: 38px;
+  background: var(--surface-3);
+  padding: 12px 18px;
+  border-radius: 18px;
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+
+.feature-modal-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.feature-modal-body strong { color: var(--text); }
+.feature-modal-body ul { margin-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.feature-modal-body li { color: var(--text-dim); font-size: 13px; }
 
 /* Desktop Optimizations */
 @media (min-width: 860px) {
@@ -1185,4 +1214,18 @@ img {
   #homeScreen { padding: 26px 36px 60px; }
   .persona-grid { grid-template-columns: repeat(3, 1fr); display: grid; }
   .persona-card { flex-direction: column; align-items: flex-start; }
+}
+
+/* Mobile Screens Strict Containment */
+@media (max-width: 480px) {
+  #homeScreen { padding: 16px 14px 40px; gap: 18px; }
+  .hero-weather-card { padding: 16px; }
+  .temp { font-size: 40px; }
+  .metrics-hud { padding: 8px 10px; gap: 6px; }
+  .metric-card { padding: 6px 8px; }
+  .m-val { font-size: 12px; }
+  .chat-composer { padding: 10px 12px; }
+  .chat-composer input { font-size: 14px; padding: 10px 12px; }
+  .chat-composer button { width: 44px; height: 44px; }
+  .modal-card { padding: 20px 16px; width: calc(100% - 24px); }
 }
