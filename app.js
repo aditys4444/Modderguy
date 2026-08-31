@@ -366,8 +366,14 @@ function showHomeScreen() {
   const home = $("homeScreen");
   const con = $("consoleScreen");
   const navBtn = $("homeNavBtn");
-  if (home) home.classList.add("active-screen");
-  if (con) con.classList.remove("active-screen");
+  if (home) {
+    home.style.setProperty("display", "flex", "important");
+    home.classList.add("active-screen");
+  }
+  if (con) {
+    con.style.setProperty("display", "none", "important");
+    con.classList.remove("active-screen");
+  }
   if (navBtn) navBtn.style.display = "none";
   document.documentElement.style.setProperty("--accent", "#E8A33D");
   document.documentElement.style.setProperty("--accent-soft", "rgba(232,163,61,0.15)");
@@ -387,8 +393,14 @@ function openConsoleScreen(role) {
   const con = $("consoleScreen");
   const navBtn = $("homeNavBtn");
 
-  if (home) home.classList.remove("active-screen");
-  if (con) con.classList.add("active-screen");
+  if (home) {
+    home.style.setProperty("display", "none", "important");
+    home.classList.remove("active-screen");
+  }
+  if (con) {
+    con.style.setProperty("display", "flex", "important");
+    con.classList.add("active-screen");
+  }
   if (navBtn) navBtn.style.display = "flex";
 
   const t = I18N[state.lang] || I18N.hinglish;

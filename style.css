@@ -381,11 +381,11 @@ button, input, select { font-family: inherit; }
 .view-screen {
   width: 100%;
   height: 100%;
-  display: none;
+  display: none !important;
 }
 .view-screen.active-screen {
-  display: flex;
-  flex-direction: column;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* =========================================================
@@ -394,8 +394,6 @@ button, input, select { font-family: inherit; }
 #homeScreen {
   overflow-y: auto;
   padding: 20px 18px 48px;
-  display: flex;
-  flex-direction: column;
   gap: 20px;
   background: var(--bg-gradient);
 }
