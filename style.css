@@ -757,11 +757,14 @@ button, input, select { font-family: inherit; }
   flex: 1;
   min-height: 0;
   height: 100%;
+  width: 100%;
   overflow: hidden;
   background: var(--bg);
+  flex-direction: column;
 }
 #consoleScreen.active-screen {
-  display: flex;
+  display: flex !important;
+  flex-direction: column !important;
 }
 
 /* Console Sub-Bar */

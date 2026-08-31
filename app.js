@@ -363,23 +363,33 @@ function initSplashScreen() {
    APP ROUTER (Home Screen vs Console Screen)
    ========================================================= */
 function showHomeScreen() {
-  homeScreen.classList.add("active-screen");
-  consoleScreen.classList.remove("active-screen");
-  homeNavBtn.style.display = "none";
+  const home = $("homeScreen");
+  const con = $("consoleScreen");
+  const navBtn = $("homeNavBtn");
+  if (home) home.classList.add("active-screen");
+  if (con) con.classList.remove("active-screen");
+  if (navBtn) navBtn.style.display = "none";
   document.documentElement.style.setProperty("--accent", "#E8A33D");
   document.documentElement.style.setProperty("--accent-soft", "rgba(232,163,61,0.15)");
 }
+window.showHomeScreen = showHomeScreen;
 
 function openConsoleScreen(role) {
+  if (!role || !ROLE_META[role]) role = "farmer";
   state.role = role;
   const m = ROLE_META[role];
   if (!m) return;
+
   document.documentElement.style.setProperty("--accent", m.accent);
   document.documentElement.style.setProperty("--accent-soft", m.soft);
 
-  homeScreen.classList.remove("active-screen");
-  consoleScreen.classList.add("active-screen");
-  homeNavBtn.style.display = "flex";
+  const home = $("homeScreen");
+  const con = $("consoleScreen");
+  const navBtn = $("homeNavBtn");
+
+  if (home) home.classList.remove("active-screen");
+  if (con) con.classList.add("active-screen");
+  if (navBtn) navBtn.style.display = "flex";
 
   const t = I18N[state.lang] || I18N.hinglish;
   if ($("activePersonaLabel")) $("activePersonaLabel").textContent = `${t.activeConsolePrefix} ${m.label}`;
@@ -387,13 +397,14 @@ function openConsoleScreen(role) {
 
   renderSuggestionChips(role);
 
-  if (messagesEl.children.length === 0) {
+  if (messagesEl && messagesEl.children.length === 0) {
     addAssistantText(`${t.welcomePrefix} **${m.label} Console**. ${t.welcomeSuffix}`);
   }
 
   if (!state.currentWeather) detectLocation();
   if (state.user) persistUserPrefs();
 }
+window.openConsoleScreen = openConsoleScreen;
 
 homeNavBtn?.addEventListener("click", showHomeScreen);
 

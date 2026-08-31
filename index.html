@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
 
   <!-- Main Stylesheet with Cache Busting -->
-  <link rel="stylesheet" href="style.css?v=2.8" />
+  <link rel="stylesheet" href="style.css?v=2.9" />
 </head>
 <body>
 
@@ -50,10 +50,10 @@
     <!-- Top Global App Bar -->
     <header class="app-header">
       <div class="header-left">
-        <button class="nav-back-btn" id="homeNavBtn" title="Back to Home" style="display:none;" aria-label="Home">
+        <button class="nav-back-btn" id="homeNavBtn" onclick="showHomeScreen()" title="Back to Home" style="display:none;" aria-label="Home">
           &#8592; <span class="nav-back-label" id="lblHomeBack">Home</span>
         </button>
-        <div class="brand" id="brandTitle">
+        <div class="brand" id="brandTitle" onclick="showHomeScreen()">
           <img src="https://iili.io/CyvRiX9.md.png" class="brand-logo-img" alt="WeatherGPT Logo" width="28" height="28" style="width:28px;height:28px;max-width:28px;max-height:28px;" />
           <span class="brand-name">WeatherGPT</span>
           <span class="brand-badge" id="brandBadge">AI</span>
@@ -133,7 +133,7 @@
 
         <div class="persona-grid">
           <!-- Farmer Persona Card -->
-          <div class="persona-card" data-role="farmer">
+          <div class="persona-card" data-role="farmer" onclick="openConsoleScreen('farmer')">
             <div class="card-glow"></div>
             <div class="persona-icon-box farmer-icon">🌾</div>
             <div class="persona-body">
@@ -150,7 +150,7 @@
           </div>
 
           <!-- Fisherman Persona Card -->
-          <div class="persona-card" data-role="fisherman">
+          <div class="persona-card" data-role="fisherman" onclick="openConsoleScreen('fisherman')">
             <div class="card-glow"></div>
             <div class="persona-icon-box fisherman-icon">🎣</div>
             <div class="persona-body">
@@ -167,7 +167,7 @@
           </div>
 
           <!-- General Public Persona Card -->
-          <div class="persona-card" data-role="general">
+          <div class="persona-card" data-role="general" onclick="openConsoleScreen('general')">
             <div class="card-glow"></div>
             <div class="persona-icon-box general-icon">☀️</div>
             <div class="persona-body">
@@ -372,6 +372,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 
   <!-- Application Logic with Cache Busting -->
-  <script src="app.js?v=2.8"></script>
+  <script src="app.js?v=2.9"></script>
 </body>
 </html>
