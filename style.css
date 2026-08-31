@@ -200,8 +200,12 @@ button, input, select { font-family: inherit; }
    ========================================================= */
 #app {
   width: 100%;
-  height: 100dvh;
+  /* Order matters: 100vh is the FALLBACK and must come first, with 100dvh
+     overriding it where supported. Previously 100vh came second and won,
+     so on mobile the app was sized to the viewport INCLUDING the browser
+     toolbar — pushing the chat composer off the bottom of the screen. */
   height: 100vh;
+  height: 100dvh;
   max-width: 1080px;
   margin: 0 auto;
   display: flex;
@@ -1025,6 +1029,48 @@ button, input, select { font-family: inherit; }
   font-weight: bold;
 }
 
+/* Explicit DO / DON'T action lists */
+.action-section {
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+}
+.action-do {
+  background: rgba(79, 191, 139, 0.08);
+  border-color: rgba(79, 191, 139, 0.35);
+}
+.action-avoid {
+  background: rgba(224, 86, 107, 0.08);
+  border-color: rgba(224, 86, 107, 0.35);
+}
+.action-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.action-do .action-title { color: #6FD3A6; }
+.action-avoid .action-title { color: #F08094; }
+.action-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.action-list li {
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text);
+  padding-left: 14px;
+  position: relative;
+}
+.action-list li::before {
+  content: '›';
+  position: absolute;
+  left: 2px;
+  color: var(--text-dim);
+  font-weight: bold;
+}
+
 .best-window-box {
   display: flex;
   align-items: center;
@@ -1402,11 +1448,28 @@ button, input, select { font-family: inherit; }
   .console-city-badge { padding: 4px 8px; font-size: 11px; }
   .live-radar-badge { padding: 4px 8px; font-size: 10.5px; }
 
-  .metrics-hud { grid-template-columns: repeat(3, 1fr); padding: 8px 10px; gap: 6px; }
-  .metric-card { padding: 6px 8px; gap: 5px; }
-  .m-icon { font-size: 14px; }
-  .m-label { font-size: 9.5px; }
-  .m-val { font-size: 11.5px; }
+  /* Was a 3-column grid with 9.5px labels — unreadably small and the icons
+     sat misaligned against wrapped text. A horizontal scroll row lets each
+     card keep a comfortable size and consistent icon/text baseline. */
+  .metrics-hud {
+    display: flex;
+    grid-template-columns: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .metrics-hud::-webkit-scrollbar { display: none; }
+  .metric-card {
+    flex: 0 0 auto;
+    min-width: 118px;
+    padding: 9px 12px;
+    gap: 9px;
+    align-items: center;
+  }
+  .m-icon { font-size: 19px; line-height: 1; }
+  .m-label { font-size: 11px; }
+  .m-val { font-size: 13.5px; }
 
   .chat-messages-container { padding: 12px 10px; gap: 12px; }
   .bubble { font-size: 14px; padding: 10px 12px; max-width: 90%; }
@@ -1442,6 +1505,8 @@ button, input, select { font-family: inherit; }
 
 /* Micro-screens (< 360px) */
 @media (max-width: 360px) {
-  .metrics-hud { grid-template-columns: repeat(2, 1fr); }
+  /* metrics-hud is a scroll row here too — the old 2-column grid override
+     was removed so it doesn't fight the flex layout above. */
+  .metric-card { min-width: 108px; padding: 8px 10px; }
   .hero-card-header { flex-direction: column; align-items: flex-start; }
 }

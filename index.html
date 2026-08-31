@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>WeatherGPT - Next-Gen Climate &amp; Decision Intelligence</title>
   <meta name="description" content="AI-powered climate and causal decision intelligence platform for Agriculture, Maritime Fisheries, and Everyday Life." />
 
@@ -233,6 +233,13 @@
 
         <!-- 6-Metric Live Sensor Telemetry HUD -->
         <div id="metricsGrid" class="metrics-hud">
+          <div class="metric-card">
+            <span class="m-icon">&#127777;&#65039;</span>
+            <div class="m-data">
+              <span class="m-label" id="lblTemp">Temperature</span>
+              <span class="m-val" id="consoleTempVal">--&#176;</span>
+            </div>
+          </div>
           <div class="metric-card">
             <span class="m-icon">&#128168;</span>
             <div class="m-data">

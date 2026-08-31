@@ -41,6 +41,7 @@ const I18N = {
     chatPlaceholder: "Ask anything (e.g. Kya aaj spray karein? Boat nikalna safe hai?)",
     lblHomeBack: "Home",
     activeConsolePrefix: "Active Console:",
+    lblTemp: "Temperature",
     lblWind: "Wind & Gusts",
     lblHum: "Humidity",
     lblUv: "UV Index",
@@ -51,6 +52,8 @@ const I18N = {
     welcomeSuffix: "I analyze live Air Quality (AQI), wind dynamics, UV, and humidity to give you sharp, practical, causal decisions — ask me anything!",
     decisionIntel: "Decision Intelligence",
     whyScience: "Causal Logic & Science (Kyun?):",
+    doNowTitle: "Ye karo",
+    avoidNowTitle: "Ye mat karo",
     bestWindow: "Best Window:",
     confirmedNearby: "people confirmed nearby",
     youConfirmed: "You confirmed nearby",
@@ -94,6 +97,7 @@ const I18N = {
     chatPlaceholder: "कुछ भी पूछें (उदा. क्या आज कीटनाशक का छिड़काव करें? नाव निकालना सुरक्षित है?)",
     lblHomeBack: "होम",
     activeConsolePrefix: "सक्रिय कंसोल:",
+    lblTemp: "तापमान",
     lblWind: "हवा और झोंके",
     lblHum: "आर्द्रता (नमी)",
     lblUv: "UV इंडेक्स",
@@ -104,6 +108,8 @@ const I18N = {
     welcomeSuffix: "मैं लाइव वायु गुणवत्ता (AQI), हवा की गति, UV और आर्द्रता का विश्लेषण करके आपको ठोस और तार्किक निर्णय दूंगा — कुछ भी पूछें!",
     decisionIntel: "निर्णय बुद्धिमत्ता (Decision Intelligence)",
     whyScience: "कारण और वैज्ञानिक तर्क (क्यों?):",
+    doNowTitle: "यह करें",
+    avoidNowTitle: "यह न करें",
     bestWindow: "सर्वोत्तम समय (Best Window):",
     confirmedNearby: "लोगों ने आस-पास पुष्टि की",
     youConfirmed: "आपने पुष्टि की",
@@ -147,6 +153,7 @@ const I18N = {
     chatPlaceholder: "Ask anything (e.g. Should I spray pesticides today? Is it safe to sail?)",
     lblHomeBack: "Home",
     activeConsolePrefix: "Active Console:",
+    lblTemp: "Temperature",
     lblWind: "Wind & Gusts",
     lblHum: "Humidity",
     lblUv: "UV Index",
@@ -157,6 +164,8 @@ const I18N = {
     welcomeSuffix: "I analyze live Air Quality (AQI), wind dynamics, UV, and humidity to give you sharp, practical, causal decisions — ask me anything!",
     decisionIntel: "Decision Intelligence",
     whyScience: "Causal Logic & Science (Why?):",
+    doNowTitle: "Do this",
+    avoidNowTitle: "Avoid this",
     bestWindow: "Best Window:",
     confirmedNearby: "people confirmed nearby",
     youConfirmed: "You confirmed nearby",
@@ -294,6 +303,11 @@ const state = {
   authMode: "login",
   currentWeather: null,
   aqiData: null,
+  // Incremented on every new weather request. A response whose token no
+  // longer matches is stale (user switched city / GPS resolved later) and
+  // is discarded instead of overwriting fresher data.
+  fetchToken: 0,
+  lastUpdated: null,
 };
 
 const ROLE_META = {
@@ -539,8 +553,51 @@ featureModal?.addEventListener("click", (e) => {
    ========================================================= */
 let searchDebounceTimer = null;
 
+// OpenStreetMap Nominatim — far better coverage of small Indian villages,
+// hamlets and localities than Open-Meteo's gazetteer, which only indexes
+// larger populated places. Used as a fallback so tiny locations still resolve.
+async function searchNominatim(query) {
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=8&accept-language=en`
+    );
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!Array.isArray(data)) return [];
+    return data.map(r => {
+      const a = r.address || {};
+      const name = a.village || a.hamlet || a.town || a.suburb || a.city
+        || a.county || (r.display_name || "").split(",")[0];
+      return {
+        name,
+        admin1: a.state_district || a.state || "",
+        country: a.country || "",
+        country_code: (a.country_code || "").toUpperCase(),
+        latitude: parseFloat(r.lat),
+        longitude: parseFloat(r.lon)
+      };
+    }).filter(r => r.name && !isNaN(r.latitude) && !isNaN(r.longitude));
+  } catch (err) {
+    console.warn("Nominatim lookup failed:", err);
+    return [];
+  }
+}
+
+function dedupeLocations(list) {
+  const seen = new Set();
+  return list.filter(loc => {
+    // Same place can come back from several sources with slightly different
+    // labels; collapse on rounded coordinates instead of on the name.
+    const key = `${loc.latitude.toFixed(2)},${loc.longitude.toFixed(2)}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 async function searchGeocoding(query) {
   const qLower = query.toLowerCase().trim();
+  if (!qLower) return [];
   const list = [];
 
   // Check known dictionary first (e.g. Dahisar, Borivali, Assam, Odisha)
@@ -558,27 +615,33 @@ async function searchGeocoding(query) {
     }
   }
 
-  // Fetch Open-Meteo Geocoding
+  let openMeteoResults = [];
   try {
     const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=20&language=en&format=json`);
-    const data = await res.json();
-    if (data && data.results && data.results.length > 0) {
-      const indiaResults = [];
-      const globalResults = [];
-
-      data.results.forEach(loc => {
-        const isIndia = loc.country_code === "IN" || (loc.country || "").toLowerCase() === "india";
-        if (isIndia) indiaResults.push(loc);
-        else globalResults.push(loc);
-      });
-
-      return [...list, ...indiaResults, ...globalResults].slice(0, 8);
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.results)) openMeteoResults = data.results;
     }
   } catch (err) {
-    console.error("Geocoding fetch error:", err);
+    console.warn("Open-Meteo geocoding failed:", err);
   }
 
-  return list.slice(0, 8);
+  // Only pay for the extra request when the primary source came up short —
+  // this is what makes small villages findable instead of "City not found".
+  let osmResults = [];
+  if (list.length + openMeteoResults.length < 3) {
+    osmResults = await searchNominatim(query);
+  }
+
+  const indiaResults = [];
+  const globalResults = [];
+  [...openMeteoResults, ...osmResults].forEach(loc => {
+    if (loc.latitude === undefined || loc.longitude === undefined) return;
+    const isIndia = loc.country_code === "IN" || (loc.country || "").toLowerCase() === "india";
+    (isIndia ? indiaResults : globalResults).push(loc);
+  });
+
+  return dedupeLocations([...list, ...indiaResults, ...globalResults]).slice(0, 8);
 }
 
 function setupAutocomplete(inputId, dropdownId, onSelectCallback) {
@@ -732,6 +795,7 @@ function applyLanguage(lang) {
   if ($("cityInput")) $("cityInput").placeholder = t.searchPlaceholder;
   if ($("chatInput")) $("chatInput").placeholder = t.chatPlaceholder;
 
+  if ($("lblTemp")) $("lblTemp").textContent = t.lblTemp;
   if ($("lblWind")) $("lblWind").textContent = t.lblWind;
   if ($("lblHum")) $("lblHum").textContent = t.lblHum;
   if ($("lblUv")) $("lblUv").textContent = t.lblUv;
@@ -772,23 +836,31 @@ function detectLocation() {
 
 async function fetchWeatherByCity(city) {
   $("cityName").textContent = `Searching ${city}…`;
+  const token = state.fetchToken;
   try {
     const results = await searchGeocoding(city);
+    // Another lookup started while geocoding was in flight — abandon this one
+    // so it can't reassign state.coords and drag the radar to a stale city.
+    if (token !== state.fetchToken) return;
     if (results.length > 0) {
       const loc = results[0];
       state.coords = { lat: loc.latitude, lon: loc.longitude };
-      state.city = `${loc.name}${loc.admin1 ? `, ${loc.admin1}` : ""}${loc.country ? `, ${loc.country}` : ""}`;
-      await fetchAllWeatherData(loc.latitude, loc.longitude, loc.name, loc.country);
+      // Keep the district/state in the label — for small villages the bare
+      // name is ambiguous, and fetchAllWeatherData used to overwrite this
+      // with just "name, country", throwing the admin1 part away.
+      const fullLabel = `${loc.name}${loc.admin1 ? `, ${loc.admin1}` : ""}${loc.country ? `, ${loc.country}` : ""}`;
+      state.city = fullLabel;
+      await fetchAllWeatherData(loc.latitude, loc.longitude, fullLabel, null);
     } else {
       const res = await fetch(`${WORKER_URL}/weather`, {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ city })
       });
-      const data = await res.json();
+      const data = res.ok ? await res.json() : null;
       if (data && data.name) {
         applyWeather(data);
       } else {
-        $("cityName").textContent = "City not found";
+        $("cityName").textContent = `"${city}" not found — try adding the district`;
       }
     }
   } catch (e) {
@@ -847,26 +919,68 @@ function getAqiBreakpoints(aqi, pm25) {
   return { aqi, label, cssClass, risk, pm25 };
 }
 
+// Resolves a human-readable place name from raw coordinates (used after a
+// GPS fix, where we have lat/lon but no city name). Free, no API key.
+const _revGeoCache = new Map();
+async function reverseGeocode(lat, lon) {
+  // The radar re-fetches every 45s with the same coords; without this cache
+  // that would hammer the geocoder pointlessly and risk being rate-limited.
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  if (_revGeoCache.has(key)) return _revGeoCache.get(key);
+  try {
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+    if (!res.ok) return null;
+    const d = await res.json();
+    const place = d.locality || d.city || d.principalSubdivision;
+    if (!place) return null;
+    const label = d.countryCode ? `${place}, ${d.countryCode}` : place;
+    _revGeoCache.set(key, label);
+    return label;
+  } catch (e) {
+    console.warn("reverseGeocode failed:", e);
+    return null;
+  }
+}
+
 async function fetchAllWeatherData(lat, lon, cityName = null, country = null) {
+  const token = ++state.fetchToken;
   try {
     const [forecastRes, aqiRes] = await Promise.all([
       fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,weather_code,surface_pressure,wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index,visibility&timezone=auto`),
       fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi,pm2_5,pm10,carbon_monoxide,nitrogen_dioxide,ozone&timezone=auto`)
     ]);
 
+    // Without this check a failed/error response still parsed as JSON, left
+    // forecast.current undefined, and every `??` default below kicked in —
+    // silently displaying a fake 28° as if it were a real reading.
+    if (!forecastRes.ok) throw new Error(`Forecast API returned ${forecastRes.status}`);
+
     const forecastData = await forecastRes.json();
-    const aqiData = await aqiRes.json();
+    const aqiData = aqiRes.ok ? await aqiRes.json() : {};
+
+    if (!forecastData || !forecastData.current) {
+      throw new Error("Forecast API returned no current readings");
+    }
+
+    // A newer request started while this one was in flight — drop this
+    // result rather than overwriting fresher data.
+    if (token !== state.fetchToken) return;
 
     if (cityName) {
       state.city = country ? `${cityName}, ${country}` : cityName;
-    } else if (!state.city) {
-      state.city = `Location (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
+    } else {
+      // Coordinate-driven fetch (GPS). Previously guarded by `!state.city`,
+      // which never passed because state.city is seeded with a default —
+      // so the label kept showing the old city after re-detecting location.
+      const resolved = await reverseGeocode(lat, lon);
+      if (token !== state.fetchToken) return;
+      state.city = resolved || `Location (${lat.toFixed(2)}, ${lon.toFixed(2)})`;
     }
 
     applyEnrichedWeather(forecastData, aqiData);
   } catch (e) {
     console.error("Enriched weather fetch fallback:", e);
-    fetchWeatherByCoordsFallback(lat, lon);
+    if (token === state.fetchToken) fetchWeatherByCoordsFallback(lat, lon);
   }
 }
 
@@ -914,8 +1028,13 @@ function applyEnrichedWeather(forecast, aqiRaw) {
   const curAqi = aqiRaw.current || {};
   const t = I18N[state.lang] || I18N.hinglish;
 
-  const temp = Math.round(cur.temperature_2m ?? 28);
-  const feelsLike = Math.round(cur.apparent_temperature ?? temp);
+  // Round only for display. Previously the rounded integer was ALSO what
+  // got stored in state and fed to the AI, so 29.6°C became "29°C"
+  // everywhere — the displayed value drifted from the real reading.
+  const tempRaw = cur.temperature_2m ?? 28;
+  const feelsRaw = cur.apparent_temperature ?? tempRaw;
+  const temp = Math.round(tempRaw);
+  const feelsLike = Math.round(feelsRaw);
   const humidity = Math.round(cur.relative_humidity_2m ?? 60);
   const windKmh = Math.round(cur.wind_speed_10m ?? 12);
   const gustKmh = Math.round(cur.wind_gusts_10m ?? (windKmh * 1.3));
@@ -932,6 +1051,7 @@ function applyEnrichedWeather(forecast, aqiRaw) {
   $("cityName").textContent = state.city;
   if ($("consoleCityName")) $("consoleCityName").textContent = state.city;
   $("tempVal").textContent = `${temp}°`;
+  if ($("consoleTempVal")) $("consoleTempVal").textContent = `${temp}° (${t.feelsLikePrefix} ${feelsLike}°)`;
   $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}°`;
   $("condText").textContent = desc;
   $("windVal").textContent = `${windKmh} km/h ${windDir} (G:${gustKmh})`;
@@ -948,11 +1068,15 @@ function applyEnrichedWeather(forecast, aqiRaw) {
 
   // Store in State for AI Context
   state.currentWeather = {
-    temp, feelsLike, humidity, windKmh, gustKmh, windDir, uv, rainChance, visibilityKm, description: desc
+    temp, feelsLike,
+    tempPrecise: Math.round(tempRaw * 10) / 10,
+    feelsPrecise: Math.round(feelsRaw * 10) / 10,
+    humidity, windKmh, gustKmh, windDir, uv, rainChance, visibilityKm, description: desc
   };
   state.aqiData = {
     aqi: standardAqi.aqi, category: standardAqi.label, pm25: standardAqi.pm25, risk: standardAqi.risk
   };
+  state.lastUpdated = Date.now();
 
   drawSparkline(temp);
   if (state.user) persistUserPrefs();
@@ -970,6 +1094,7 @@ function applyWeather(data) {
   $("cityName").textContent = state.city;
   if ($("consoleCityName")) $("consoleCityName").textContent = state.city;
   $("tempVal").textContent = `${temp}°`;
+  if ($("consoleTempVal")) $("consoleTempVal").textContent = `${temp}° (${t.feelsLikePrefix} ${feelsLike}°)`;
   $("feelsLikeVal").textContent = `${t.feelsLikePrefix} ${feelsLike}°`;
   $("condText").textContent = desc;
   $("windVal").textContent = `${windKmh} km/h`;
@@ -978,7 +1103,16 @@ function applyWeather(data) {
   $("uvVal").textContent = "5 (Mod)";
   $("visVal").textContent = data.visibility ? `${(data.visibility/1000).toFixed(1)} km` : "10 km";
 
+  // This fallback source carries no air-quality data. Without clearing it,
+  // the badge kept displaying the PREVIOUS location's AQI as if it were
+  // current — worse than showing nothing.
+  state.aqiData = null;
+  if ($("aqiBadge")) $("aqiBadge").className = "aqi-badge";
+  if ($("aqiText")) $("aqiText").textContent = "AQI unavailable";
+  if ($("pmVal")) $("pmVal").textContent = "PM2.5: —";
+
   state.currentWeather = { temp, feelsLike, humidity, windKmh, description: desc };
+  state.lastUpdated = Date.now();
   drawSparkline(temp);
   if (state.user) persistUserPrefs();
 }
@@ -1058,15 +1192,22 @@ function showReasoningTrace() {
 
   const stepEls = row.querySelectorAll(".trace-step");
   let i = 0;
+  // Steps advance at a readable pace, but the FINAL step stays in the
+  // pulsing "active" state until the answer actually arrives. Previously
+  // every step ticked green within ~270ms, so the card looked finished
+  // while the request was still in flight — which read as a frozen UI.
   const interval = setInterval(() => {
     if (i > 0) {
       stepEls[i - 1].classList.remove("active");
       stepEls[i - 1].classList.add("done");
       stepEls[i - 1].querySelector(".tick").textContent = "✓";
     }
-    if (i < stepEls.length) { stepEls[i].classList.add("active"); i++; }
-    else clearInterval(interval);
-  }, 90);
+    if (i < stepEls.length - 1) { stepEls[i].classList.add("active"); i++; }
+    else {
+      stepEls[stepEls.length - 1].classList.add("active");
+      clearInterval(interval);
+    }
+  }, 420);
 
   return { row, interval };
 }
@@ -1092,26 +1233,24 @@ async function askWeatherGPT(userText) {
   const trace = showReasoningTrace();
   const detectedLang = detectUserLanguagePreference(userText);
 
-  // Rapid 3.5s timeout promise so user never experiences long lag
-  const timeoutPromise = new Promise(resolve => setTimeout(() => resolve(null), 3500));
-
+  // Previously this raced realAsk against a hard 3.5s timer. Since a real
+  // Gemini round trip takes longer than that, the timer nearly always won
+  // and the genuine AI answer was thrown away in favour of the canned
+  // fallback text. realAsk now owns its own (20s) timeout, and the fallback
+  // is used only when the model actually fails to return something usable.
+  let result = null;
   try {
-    const result = await Promise.race([
-      realAsk(userText, detectedLang),
-      timeoutPromise
-    ]);
-
-    clearInterval(trace.interval);
-    trace.row.remove();
-
-    if (result && result.reply) {
-      renderAssistantResult(result);
-    } else {
-      renderAssistantResult(fallbackResponse(userText, detectedLang));
-    }
+    result = await realAsk(userText, detectedLang);
   } catch (err) {
-    clearInterval(trace.interval);
-    trace.row.remove();
+    console.warn("askWeatherGPT error:", err);
+  }
+
+  clearInterval(trace.interval);
+  trace.row.remove();
+
+  if (result && result.reply) {
+    renderAssistantResult(result);
+  } else {
     renderAssistantResult(fallbackResponse(userText, detectedLang));
   }
 }
@@ -1119,22 +1258,45 @@ async function askWeatherGPT(userText) {
 function buildPrompt(userText, targetLang) {
   const w = state.currentWeather || {};
   const aqi = state.aqiData || {};
+  const roleContext = {
+    farmer: "a farmer making decisions about spraying, irrigation, sowing, harvesting and protecting crops",
+    fisherman: "a fisherman making go/no-go decisions about taking a boat out, net casting and sea safety",
+    general: "a member of the public making everyday decisions about commuting, outdoor activity and health"
+  }[state.role] || "a general user";
 
-  return `You are WeatherGPT for ${state.role} in ${state.city}.
-Live data: Temp ${w.temp || 28}°C (Feels ${w.feelsLike || 29}°C), AQI ${aqi.aqi || 85} (${aqi.category || 'Satisfactory'}, PM2.5 ${aqi.pm25 || 25}), Wind ${w.windKmh || 12} km/h (Gust ${w.gustKmh || 16}), Humidity ${w.humidity || 60}%, Rain ${w.rainChance || 15}%, UV ${w.uv || 4}, Condition ${w.description || 'Clear Sky'}.
-Target Language: ${targetLang.toUpperCase()} ("Hinglish" | "Hindi" | "English").
-Rules:
-1. If query is testing/slang/casual/tricky (e.g. cricket, walk, party, travel, sleep, pakode), answer smartly and politely by analyzing rain %, gusts, AQI & temp.
-2. Provide direct scientific causal advice for ${state.role}.
+  return `You are WeatherGPT advising ${roleContext} in ${state.city}.
+
+LIVE SENSOR DATA:
+Temperature ${w.tempPrecise ?? w.temp ?? 28}°C (feels like ${w.feelsPrecise ?? w.feelsLike ?? 29}°C)
+Wind ${w.windKmh ?? 12} km/h, gusting to ${w.gustKmh ?? 16} km/h
+Rain probability ${w.rainChance ?? 15}%
+Humidity ${w.humidity ?? 60}%
+UV index ${w.uv ?? 4}
+AQI ${aqi.aqi ?? 85} (${aqi.category ?? 'Satisfactory'}, PM2.5 ${aqi.pm25 ?? 25} µg/m³)
+Visibility ${w.visibilityKm ?? 10} km
+Condition: ${w.description ?? 'Clear Sky'}
+
+Target Language: ${targetLang.toUpperCase()} ("Hinglish" | "Hindi" | "English"). Write reply, do_now, avoid_now, advice and logic_points ALL in this language.
+
+RULES:
+1. Give a real DECISION, never vague filler. "Exercise caution due to atmospheric factors" is a FAILURE — it tells the user nothing.
+2. "do_now" = 2-3 concrete things they SHOULD do right now. "avoid_now" = 2-3 concrete things they should NOT do right now. Each item must be a specific action, and where it matters, name the number that drives it (e.g. "Gusts hitting 41 km/h — don't spray, drift will waste chemical").
+3. Weigh ALL the data, especially gusts, rain probability and UV — not just temperature and AQI. Gusts above 25 km/h matter for spraying; above 35 km/h matter for small boats; rain above 60% blocks spraying and irrigation.
+4. If the query is casual, slang or off-beat (cricket, walk, party, travel, pakode), still answer it usefully by reasoning from the live numbers.
+5. verdict: "SAFE" if the intended activity is fine now, "CAUTION" if it needs precautions, "NO-GO" if it should be postponed.
+6. Be honest — if the data genuinely doesn't support a strong call, say so in confidence_reason and lower the confidence number instead of inflating it.
+
 Return STRICT JSON ONLY (no markdown fences):
 {
-  "reply": "Crisp 1-2 sentence answer in requested language",
+  "reply": "Crisp 1-2 sentence direct answer in the requested language",
   "verdict": "SAFE" | "CAUTION" | "NO-GO",
-  "advice": "Punchy key action takeaway",
-  "logic_points": ["Specific reason with numbers", "Practical action guidance"],
-  "best_window": "e.g. Today after 4:00 PM or Now",
-  "confidence": 95,
-  "confidence_reason": "Live sensor telemetry verification",
+  "advice": "One punchy headline action",
+  "do_now": ["specific action to take", "another"],
+  "avoid_now": ["specific thing to avoid", "another"],
+  "logic_points": ["Reason with the actual number behind it", "Second reason"],
+  "best_window": "e.g. Today after 4:00 PM, or Now",
+  "confidence": 88,
+  "confidence_reason": "What the confidence is based on",
   "is_alert": false,
   "alert_message": ""
 }
@@ -1143,7 +1305,10 @@ Query: "${userText}"`;
 
 async function realAsk(userText, targetLang) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3200);
+  // Was 3200ms — shorter than a normal Gemini round trip, so almost every
+  // real call was aborted and silently replaced by the canned fallback text.
+  // 20s is generous enough for a slow model response but still bounded.
+  const timeoutId = setTimeout(() => controller.abort(), 20000);
 
   try {
     const res = await fetch(`${WORKER_URL}/ask`, {
@@ -1153,42 +1318,166 @@ async function realAsk(userText, targetLang) {
       signal: controller.signal
     });
     clearTimeout(timeoutId);
+    if (!res.ok) {
+      console.warn("Ask endpoint returned", res.status);
+      return null;
+    }
     const data = await res.json();
     const textPart = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!textPart) return null;
+    if (!textPart) {
+      console.warn("Ask response had no text part:", data);
+      return null;
+    }
     const cleanJson = textPart.replace(/^```json\s*/i, "").replace(/\s*```$/i, "").trim();
     return JSON.parse(cleanJson);
   } catch (e) {
     clearTimeout(timeoutId);
+    console.warn("realAsk failed:", e.name === "AbortError" ? "timed out" : e);
     return null;
   }
 }
 
+/* Role-aware rule engine used when the AI model is unreachable. Produces
+   real do/don't actions from thresholds instead of the old generic
+   "exercise caution due to live atmospheric factors" line, which told the
+   user nothing. Also honestly reports lower confidence, since this is
+   threshold logic rather than a model's judgement. */
 function fallbackResponse(userText, targetLang = "hinglish") {
   const isHindi = targetLang === "hindi";
   const isEnglish = targetLang === "english";
+  const L = (hi, en, hing) => (isHindi ? hi : isEnglish ? en : hing);
+
   const w = state.currentWeather || { temp: 29, windKmh: 14, gustKmh: 18, humidity: 62, rainChance: 20, uv: 5 };
   const aqi = state.aqiData || { aqi: 85, category: "Satisfactory", pm25: 28 };
 
-  const isSafe = (w.rainChance < 40 && w.windKmh < 25 && aqi.aqi < 150);
+  const temp = w.tempPrecise ?? w.temp;
+  const gust = w.gustKmh ?? w.windKmh;
+  const rain = w.rainChance ?? 0;
+  const uv = w.uv ?? 0;
+
+  const doNow = [], avoidNow = [], logic = [];
+  let severity = 0; // 0 = safe, 1 = caution, 2 = no-go
+
+  const bump = (lvl) => { if (lvl > severity) severity = lvl; };
+
+  // --- Wind / gusts ---
+  if (state.role === "farmer") {
+    if (gust > 25) {
+      bump(gust > 40 ? 2 : 1);
+      avoidNow.push(L(
+        `छिड़काव न करें — झोंके ${gust} किमी/घंटा हैं, दवा हवा में उड़ जाएगी`,
+        `Don't spray — gusts at ${gust} km/h will blow the chemical off-target`,
+        `Spray mat karo — gusts ${gust} km/h hain, dawai udd jayegi`));
+      logic.push(L(
+        `झोंके ${gust} किमी/घंटा, सुरक्षित छिड़काव सीमा 25 किमी/घंटा से ऊपर`,
+        `Gusts at ${gust} km/h, above the 25 km/h safe spraying limit`,
+        `Gusts ${gust} km/h — safe spray limit 25 km/h se upar`));
+    } else {
+      doNow.push(L(
+        `छिड़काव के लिए हवा ठीक है (${gust} किमी/घंटा झोंके)`,
+        `Wind is fine for spraying (${gust} km/h gusts)`,
+        `Spray ke liye hawa theek hai (${gust} km/h gusts)`));
+    }
+  } else if (state.role === "fisherman") {
+    if (gust > 35) {
+      bump(2);
+      avoidNow.push(L(
+        `छोटी नाव न निकालें — झोंके ${gust} किमी/घंटा`,
+        `Don't take a small boat out — gusts at ${gust} km/h`,
+        `Chhoti boat mat nikalo — gusts ${gust} km/h`));
+      logic.push(L(
+        `झोंके ${gust} किमी/घंटा, छोटी नावों की 35 किमी/घंटा सीमा से ऊपर`,
+        `Gusts at ${gust} km/h, above the 35 km/h small-craft limit`,
+        `Gusts ${gust} km/h — small boat limit 35 km/h se upar`));
+    } else if (gust > 25) {
+      bump(1);
+      doNow.push(L(`तट के पास रहें, लंगर दोबारा जाँचें`, `Stay close to shore and re-check moorings`, `Shore ke paas raho, moorings check karo`));
+    } else {
+      doNow.push(L(`समुद्र शांत है — सामान्य यात्रा ठीक है`, `Sea is calm — normal trip conditions`, `Samandar shaant hai — normal trip theek hai`));
+    }
+  } else {
+    if (gust > 45) {
+      bump(1);
+      avoidNow.push(L(`पेड़ों और होर्डिंग के नीचे खड़े न हों`, `Avoid standing under trees and hoardings`, `Ped aur hoarding ke neeche mat khade raho`));
+    }
+  }
+
+  // --- Rain ---
+  if (rain >= 60) {
+    bump(rain >= 85 ? 2 : 1);
+    logic.push(L(`बारिश की संभावना ${rain}%`, `Rain probability is ${rain}%`, `Rain chance ${rain}%`));
+    if (state.role === "farmer") {
+      avoidNow.push(L(`आज सिंचाई न करें — बारिश पानी दे देगी`, `Skip irrigation today — the rain will cover it`, `Aaj sinchai mat karo — barish cover kar degi`));
+      doNow.push(L(`कटी फसल और खाद ढक दें`, `Cover harvested crop and fertiliser`, `Kati fasal aur khaad dhak do`));
+    } else if (state.role === "fisherman") {
+      doNow.push(L(`दृश्यता गिर सकती है — नेविगेशन लाइट साथ रखें`, `Visibility may drop — carry navigation lights`, `Visibility gir sakti hai — navigation lights rakho`));
+    } else {
+      doNow.push(L(`छाता लें और यात्रा में अतिरिक्त समय रखें`, `Carry an umbrella and allow extra travel time`, `Chhata lo aur travel mein extra time rakho`));
+    }
+  }
+
+  // --- Air quality ---
+  if (aqi.aqi > 200) {
+    bump(2);
+    avoidNow.push(L(`बाहर लंबी मेहनत का काम न करें`, `Avoid prolonged outdoor exertion`, `Bahar lambi mehnat ka kaam mat karo`));
+    logic.push(L(`AQI ${aqi.aqi} (PM2.5 ${aqi.pm25})`, `AQI is ${aqi.aqi} (PM2.5 ${aqi.pm25})`, `AQI ${aqi.aqi} (PM2.5 ${aqi.pm25})`));
+  } else if (aqi.aqi > 100) {
+    bump(1);
+    doNow.push(L(`संवेदनशील लोग मास्क पहनें`, `Sensitive groups should wear a mask`, `Sensitive logon ko mask pehenna chahiye`));
+    logic.push(L(`AQI ${aqi.aqi} (${aqi.category})`, `AQI is ${aqi.aqi} (${aqi.category})`, `AQI ${aqi.aqi} (${aqi.category})`));
+  } else {
+    logic.push(L(`AQI ${aqi.aqi} (${aqi.category}) — साफ हवा`, `AQI is ${aqi.aqi} (${aqi.category}) — clean air`, `AQI ${aqi.aqi} (${aqi.category}) — hawa saaf hai`));
+  }
+
+  // --- Heat & UV ---
+  if (temp >= 38) {
+    bump(1);
+    avoidNow.push(L(`दोपहर 12–3 बजे बाहर काम न करें`, `Don't work outdoors between 12–3pm`, `12–3pm ke beech bahar kaam mat karo`));
+    logic.push(L(`तापमान ${temp}°C`, `Temperature is ${temp}°C`, `Temperature ${temp}°C`));
+  }
+  if (uv >= 8) {
+    bump(Math.max(severity, 1));
+    doNow.push(L(`सनस्क्रीन और सिर ढकें (UV ${uv})`, `Use sunscreen and cover your head (UV ${uv})`, `Sunscreen lagao aur sar dhako (UV ${uv})`));
+  }
+
+  if (doNow.length === 0) {
+    doNow.push(L(`योजना के अनुसार काम जारी रखें`, `Carry on with your plan as scheduled`, `Plan ke hisaab se kaam continue karo`));
+  }
+  if (avoidNow.length === 0) {
+    avoidNow.push(L(`फिलहाल कोई खास रोक नहीं`, `Nothing specific to avoid right now`, `Filhal koi khaas rok nahi hai`));
+  }
+  if (logic.length === 0) {
+    logic.push(L(`सभी माप सुरक्षित सीमा में`, `All readings are within safe limits`, `Sab readings safe range mein hain`));
+  }
+
+  const verdict = severity === 2 ? "NO-GO" : severity === 1 ? "CAUTION" : "SAFE";
+  const headline = severity === 2
+    ? L(`अभी टालें — स्थिति सुरक्षित नहीं`, `Postpone for now — conditions aren't safe`, `Abhi tal do — conditions safe nahi hain`)
+    : severity === 1
+    ? L(`सावधानी के साथ आगे बढ़ें`, `Proceed, but take the precautions below`, `Aage badho, par neeche wali precautions lo`)
+    : L(`स्थिति अनुकूल है — आगे बढ़ें`, `Conditions are favourable — go ahead`, `Conditions favourable hain — aage badho`);
 
   return {
-    reply: isHindi
-      ? `${state.city} में वर्तमान तापमान **${w.temp}°C**, हवा **${w.windKmh} किमी/घंटा** (झोंके: ${w.gustKmh} किमी/घंटा), बारिश की संभावना **${w.rainChance}%** और AQI **${aqi.aqi} (${aqi.category})** है। आपके प्रश्न के अनुसार स्थिति ${isSafe ? 'अनुकूल' : 'सावधानीपूर्ण'} है।`
-      : isEnglish
-      ? `In ${state.city}, current temperature is **${w.temp}°C**, wind is **${w.windKmh} km/h** (gusts: ${w.gustKmh} km/h), rain chance is **${w.rainChance}%**, and AQI is **${aqi.aqi} (${aqi.category})**.`
-      : `${state.city} mein live temperature **${w.temp}°C**, wind **${w.windKmh} km/h** (gusts: ${w.gustKmh} km/h), rain chance **${w.rainChance}%** aur AQI **${aqi.aqi} (${aqi.category})** hai. Conditions ${isSafe ? 'favorable' : 'cautionary'} hain.`,
-    verdict: isSafe ? "SAFE" : "CAUTION",
-    advice: isSafe ? "Conditions favorable — proceed as planned" : "Exercise caution due to live atmospheric factors",
-    logic_points: [
-      `Wind speed is ${w.windKmh} km/h (Gusts: ${w.gustKmh} km/h) & Rain probability is ${w.rainChance}%.`,
-      `Standard AQI is ${aqi.aqi} (PM2.5: ${aqi.pm25} µg/m³).`
-    ],
-    best_window: "Current window is operational",
-    confidence: 94,
-    confidence_reason: "Ground meteorological telemetry cross-analysis",
-    is_alert: false,
-    alert_message: ""
+    reply: L(
+      `${state.city} में तापमान **${temp}°C**, हवा **${w.windKmh} किमी/घंटा** (झोंके ${gust}), बारिश **${rain}%**, AQI **${aqi.aqi}**। ${headline}`,
+      `In ${state.city}: temperature **${temp}°C**, wind **${w.windKmh} km/h** (gusts ${gust}), rain **${rain}%**, AQI **${aqi.aqi}**. ${headline}`,
+      `${state.city} mein temperature **${temp}°C**, wind **${w.windKmh} km/h** (gusts ${gust}), rain **${rain}%**, AQI **${aqi.aqi}**. ${headline}`),
+    verdict,
+    advice: headline,
+    do_now: doNow,
+    avoid_now: avoidNow,
+    logic_points: logic,
+    best_window: severity === 2
+      ? L(`स्थिति सुधरने तक रुकें`, `Wait until conditions improve`, `Conditions sudhrne tak ruko`)
+      : L(`अभी ठीक है`, `Now is fine`, `Abhi theek hai`),
+    // Honest about what this is: threshold rules, not a model's judgement.
+    confidence: 70,
+    confidence_reason: L(
+      `ऑफ़लाइन नियम-आधारित गणना (AI मॉडल अनुपलब्ध)`,
+      `Offline threshold rules (AI model unavailable)`,
+      `Offline threshold rules (AI model unavailable)`),
+    is_alert: severity === 2,
+    alert_message: severity === 2 ? headline : ""
   };
 }
 
@@ -1221,6 +1510,22 @@ function adviceBlockHtml(result) {
       </div>
 
       <div class="advice-main-action">&#10140; ${escapeHtml(result.advice || "")}</div>
+
+      ${Array.isArray(result.do_now) && result.do_now.length ? `
+        <div class="action-section action-do">
+          <div class="action-title">&#9989; ${t.doNowTitle || "Karo / Do this"}</div>
+          <ul class="action-list">
+            ${result.do_now.map(i => `<li>${escapeHtml(i)}</li>`).join("")}
+          </ul>
+        </div>` : ""}
+
+      ${Array.isArray(result.avoid_now) && result.avoid_now.length ? `
+        <div class="action-section action-avoid">
+          <div class="action-title">&#10060; ${t.avoidNowTitle || "Mat karo / Avoid"}</div>
+          <ul class="action-list">
+            ${result.avoid_now.map(i => `<li>${escapeHtml(i)}</li>`).join("")}
+          </ul>
+        </div>` : ""}
 
       <div class="logic-section">
         <div class="logic-title">&#9881;&#65039; ${t.whyScience}</div>
@@ -1636,11 +1941,16 @@ async function loadUserPrefs() {
    ========================================================= */
 initSplashScreen();
 initLiveRadar();
+// detectLocation() handles its own fallback if GPS is denied or times out.
+// (Previously a Mumbai fetch fired unconditionally right here — since
+// detectLocation is async, state.currentWeather was ALWAYS still null at
+// this point, so Mumbai raced the real GPS result and often won, showing
+// the wrong city's temperature and pinning the radar to Mumbai's coords.)
 detectLocation();
-// Instant weather fallback to ensure Hero card is vibrant immediately
-if (!state.currentWeather) {
-  fetchWeatherByCity("Mumbai, Maharashtra, India");
-}
+// Paint the hero card immediately from the seeded default coords so it is
+// never blank while GPS resolves. Safe now: GPS starts its request later,
+// so it takes a higher fetchToken and this default result is discarded.
+fetchAllWeatherData(state.coords.lat, state.coords.lon, "Mumbai", "India");
 updateAuthUI();
 applyLanguage(state.lang);
 showHomeScreen();
